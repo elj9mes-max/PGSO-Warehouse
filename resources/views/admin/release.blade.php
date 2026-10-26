@@ -1725,7 +1725,8 @@
                 return false;
             }
 
-            // Sync recipient and purpose
+            // Sync office, recipient and purpose
+            document.getElementById('formOfficeId').value = selectedOfficeId;
             document.getElementById('formRecipient').value = recipientVal;
             document.getElementById('formPurpose').value = document.getElementById('releasePurposeInput').value || '';
 
@@ -1747,6 +1748,8 @@
                 container.appendChild(qtyInput);
             });
 
+            isConfirmedSubmit = true;
+            document.getElementById('releaseForm').submit();
             return true;
         }
 

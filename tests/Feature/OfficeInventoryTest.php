@@ -618,3 +618,54 @@ test('admin can update office inventory item details and quantity', function () 
     $item->refresh();
     expect($item->category)->toBe('Executive Filing');
 });
+
+test('admin can release stock from office custody', function () {
+    $admin = User::factory()->create([
+        'account_level' => AccountLevel::Admin,
+    ]);
+
+    $office = Office::create([
+        'office_name' => 'Accounting Office',
+        'office_code' => 'OFF-ACC-001',
+    ]);
+
+    $variant = InventoryItemVariant::create([
+        'variant_name' => 'Bond Paper A4',
+        'barcode' => 'BAR-A4-001',
+        'sku' => 'SKU-A4-001',
+        'quantity' => 50,
+        'available_for_transfer' => 50,
+        'reorder_level' => 10,
+        'unit_cost' => 250.00,
+        'unit' => 'reams',
+        'status' => 'In Stock',
+        'is_for_inspection' => false,
+    ]);
+
+    $officeInventory = OfficeInventory::create([
+        'office_id' => $office->id,
+        'inventory_item_variants_id' => $variant->id,
+        'quantity' => 20,
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('admin.releases.store'), [
+        'office_id' => $office->id,
+        'recipient' => 'Jane Doe',
+        'purpose' => 'Monthly Office Supply Consumption',
+        'releases' => [
+            [
+                'variant_id' => $variant->id,
+                'quantity' => 5,
+            ],
+        ],
+    ]);
+
+    $response->assertRedirect(route('admin.releases.index', ['office' => $office->id]));
+    $response->assertSessionHas('status');
+
+    $officeInventory->refresh();
+    expect($officeInventory->quantity)->toBe(15);
+
+    $variant->refresh();
+    expect($variant->quantity)->toBe(45);
+});

@@ -1835,6 +1835,7 @@
             }
 
             // Injects hidden form fields
+            document.getElementById('formOfficeId').value = selectedOfficeId;
             const container = document.getElementById('formTransfersInputs');
             container.innerHTML = '';
 
