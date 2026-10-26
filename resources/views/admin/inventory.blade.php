@@ -1049,14 +1049,14 @@
                 </div>
 
                 <div class="header-actions">
-                    <button type="button" class="btn-outline" onclick="window.print()">
+                    {{-- <button type="button" class="btn-outline" onclick="window.print()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 6 2 18 2 18 9"></polyline>
                             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                             <rect width="12" height="8" x="6" y="14"></rect>
                         </svg>
                         <span>Print / Export</span>
-                    </button>
+                    </button> --}}
 
                     <a href="{{ route('admin.inventory.purchase-request') }}" class="btn-outline" style="text-decoration: none; color: #09090b; border-color: #cbd5e1; background: #ffffff;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1068,13 +1068,13 @@
                         <span>Receive PO Supplies</span>
                     </a>
 
-                    <button type="button" class="btn-primary" id="openAddModalBtn">
+                    {{-- <button type="button" class="btn-primary" id="openAddModalBtn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
                         <span>Add New Item</span>
-                    </button>
+                    </button> --}}
                 </div>
             </div>
 
@@ -1118,7 +1118,7 @@
                 <div class="metric-card">
                     <span class="metric-label">Low Stock Alerts</span>
                     <div class="metric-number" style="color: #d97706;">{{ $lowStockCount }}</div>
-                    <span class="metric-desc">Variants at reorder threshold</span>
+                    <span class="metric-desc">Variants with low stock balance</span>
                 </div>
 
                 <div class="metric-card">
@@ -1141,7 +1141,7 @@
                         type="text" 
                         id="searchInput" 
                         class="search-input" 
-                        placeholder="Search by variant name, barcode, SKU, item, or code..."
+                        placeholder="Search by variant name, barcode, item, or code..."
                         autocomplete="off"
                     >
                     <button type="button" id="clearSearchBtn" class="clear-search-btn" style="display: none;" onclick="clearSearch()" title="Clear search">
@@ -1216,14 +1216,13 @@
                     <table class="inventory-table" id="inventoryTable">
                         <thead>
                             <tr>
-                                <th>Item Code / SKU</th>
+                                <th>Item Code</th>
                                 <th id="thItemVariantTitle">Variant & Parent Item</th>
                                 {{-- <th>Category</th> --}}
-                                <th>Location</th>
+                                {{-- <th>Location</th> --}}
                                 <th id="thQuantityTitle">Variant Qty</th>
-                                <th>Reorder Level</th>
                                 <th>Unit Cost</th>
-                                <th>Stock Status</th>
+                                {{-- <th>Stock Status</th> --}}
                                 <th style="text-align: right;">Actions</th>
                             </tr>
                         </thead>
@@ -1248,7 +1247,7 @@
                                         default => '#71717a',
                                     };
                                     $code = $variant->item_code ?: ($variant->sku ?: ($variant->barcode ?: ($item?->item_code ?? 'VAR-'.$variant->id)));
-                                    $categoryName = $variant->category ?: ($item?->category ?? 'General');
+                                    $categoryName = $variant->effective_category;
                                     $locationName = $variant->location ?: ($item?->location ?: 'Bay Area');
                                     $variantSearchBlob = strtolower(
                                         $variant->variant_name . ' ' .
@@ -1293,7 +1292,7 @@
                                     data-status="{{ $variant->status }}"
                                     data-location="{{ $locationName }}"
                                     data-search="{{ $variantSearchBlob }}"
-                                    data-variants="{{ strtolower($variant->variant_name . ' ' . $variant->barcode . ' ' . $variant->sku . ' ' . $variant->variant_description . ' ' . $variant->location . ($variant->item_code ? ' ' . $variant->item_code : '')) }}">
+                                    data-variants="{{ strtolower($variant->variant_name . ' ' . $variant->barcode . ' ' . $variant->variant_description . ' ' . $variant->location . ($variant->item_code ? ' ' . $variant->item_code : '')) }}">
                                     <td><span class="code-pill">{{ $code }}</span></td>
                                     <td>
                                         <div class="item-name-cell">
@@ -1314,19 +1313,19 @@
                                                 @if($variant->barcode && $variant->barcode !== $variant->item_code)
                                                     • <span style="font-family: monospace;">Barcode: {{ $variant->barcode }}</span>
                                                 @endif
-                                                @if($variant->sku)
+                                                {{-- @if($variant->sku)
                                                     • <span style="font-family: monospace;">SKU: {{ $variant->sku }}</span>
-                                                @endif
+                                                @endif --}}
                                             </div>
                                         </div>
                                     </td>
                                     {{-- <td><span class="category-pill">{{ $categoryName }}</span></td> --}}
-                                    <td>
+                                    {{-- <td>
                                         <span class="location-tag">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                                             {{ $locationName }}
                                         </span>
-                                    </td>
+                                    </td> --}}
                                     <td>
                                         <span class="qty-strong">{{ $variant->quantity }}</span>
                                         <span class="qty-unit">{{ $variant->effective_unit }}</span>
@@ -1336,14 +1335,13 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td>{{ $variant->reorder_level }} {{ $variant->effective_unit }}</td>
                                     <td><strong>₱{{ number_format((float) ($variant->unit_cost ?: ($item?->unit_cost ?? 0)), 2) }}</strong></td>
-                                    <td>
+                                    {{-- <td>
                                         <span class="status-pill {{ $variant->status === 'In Stock' ? 'in-stock' : ($variant->status === 'Low Stock' ? 'low-stock' : 'out-of-stock') }}">
                                             <span class="status-dot-sm"></span>
                                             {{ $variant->status }}
                                         </span>
-                                    </td>
+                                    </td> --}}
                                     <td style="text-align: right;">
                                         <div class="table-actions" style="justify-content: flex-end;">
                                             <button type="button" 
@@ -1419,7 +1417,7 @@
                 <div class="modal-body">
                     <div class="form-row">
                         <div class="modal-field">
-                            <label class="modal-label" for="newItemCode">Item Code / SKU</label>
+                            <label class="modal-label" for="newItemCode">Item Code</label>
                             <input type="text" id="newItemCode" name="item_code" class="modal-input" placeholder="e.g. ITM-8901" required>
                         </div>
                         <div class="modal-field">
@@ -1594,11 +1592,6 @@
                         <span class="stat-sub">Eligible for office dispatch</span>
                     </div>
                     <div class="view-stat-box">
-                        <span class="stat-label">Reorder Level Threshold</span>
-                        <div class="stat-val"><span id="vmReorder">10</span> <span id="vmReorderUnit" style="font-size: 0.8125rem; font-weight: 600; color: #64748b;">pcs</span></div>
-                        <span class="stat-sub">Minimum safety threshold</span>
-                    </div>
-                    <div class="view-stat-box">
                         <span class="stat-label">Unit Cost & Stock Value</span>
                         <div class="stat-val" style="color: #09090b;">₱<span id="vmUnitCost">0.00</span></div>
                         <span class="stat-sub">Total On-Hand: <strong style="color: #09090b;">₱<span id="vmTotalCost">0.00</span></strong></span>
@@ -1619,10 +1612,10 @@
                         <span class="spec-label">Barcode Number</span>
                         <span class="spec-val" id="vmBarcode" style="font-family: monospace;">—</span>
                     </div>
-                    <div class="view-spec-item">
+                    {{-- <div class="view-spec-item">
                         <span class="spec-label">SKU Identifier</span>
                         <span class="spec-val" id="vmSku" style="font-family: monospace;">—</span>
-                    </div>
+                    </div> --}}
                     <div class="view-spec-item" style="grid-column: span 2;">
                         <span class="spec-label">Description / Specifications</span>
                         <span class="spec-val" id="vmDescription" style="font-weight: 400; color: #475569; line-height: 1.45;">—</span>
@@ -1767,14 +1760,12 @@
             document.getElementById('vmUnit').textContent = data.unit || 'pcs';
             document.getElementById('vmAvailTransfer').textContent = data.available_for_transfer ?? 0;
             document.getElementById('vmAvailUnit').textContent = data.unit || 'pcs';
-            document.getElementById('vmReorder').textContent = data.reorder_level ?? 10;
-            document.getElementById('vmReorderUnit').textContent = data.unit || 'pcs';
             document.getElementById('vmUnitCost').textContent = data.unit_cost || '0.00';
             document.getElementById('vmTotalCost').textContent = data.total_cost || '0.00';
 
             document.getElementById('vmItemCode').textContent = data.item_code || '—';
             document.getElementById('vmBarcode').textContent = data.barcode || '—';
-            document.getElementById('vmSku').textContent = data.sku || '—';
+            // document.getElementById('vmSku').textContent = data.sku || '—';
             document.getElementById('vmDescription').textContent = data.description || 'No additional description provided.';
             document.getElementById('vmUpdatedAt').textContent = data.updated_at || '—';
 

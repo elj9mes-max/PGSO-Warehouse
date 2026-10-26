@@ -8,6 +8,9 @@ use App\Models\InventoryItemVariant;
 use App\Models\InventoryLog;
 use App\Models\Office;
 use App\Models\OfficeInventory;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\StockCard;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -233,30 +236,23 @@ test('incoming delivery with different price creates separate batches preserving
         ->and((float) $batch->unit_cost)->toBe(55.00);
 });
 
-test('inventory items without variants get standard variant and are selectable', function () {
+test('inventory item variants are selectable for purchase order receiving', function () {
     $admin = User::factory()->create([
         'account_level' => AccountLevel::Admin,
     ]);
 
-    $item = InventoryItem::factory()->create([
-        'name' => 'Industrial Storage Pallets',
+    $variant = InventoryItemVariant::factory()->create([
+        'variant_name' => 'Industrial Storage Pallets',
         'item_code' => 'PAL-001',
         'quantity' => 10,
         'unit_cost' => 650.00,
         'unit' => 'pcs',
     ]);
 
-    expect($item->variants()->count())->toBe(0);
-
     $response = $this->actingAs($admin)->get(route('admin.inventory.purchase-request'));
 
     $response->assertOk();
-    $response->assertSee('Industrial Storage Pallets — Standard');
-
-    expect($item->variants()->count())->toBe(1);
-    $variant = $item->variants()->first();
-    expect($variant->variant_name)->toBe('Standard')
-        ->and((float) $variant->unit_cost)->toBe(650.00);
+    $response->assertSee('Industrial Storage Pallets');
 });
 
 test('incoming delivery with different price updates variant directly without creating new variant entry', function () {
@@ -504,4 +500,275 @@ test('admin can view and receive supplies for standalone variants without invent
     $batch = InventoryBatch::where('inventory_item_variant_id', $variant->id)->first();
     expect($batch->inventory_item_id)->toBeNull()
         ->and($batch->quantity_received)->toBe(15);
+});
+
+test('purchase order receiving form does not display import from approved purchase request selector', function () {
+    $admin = User::factory()->create([
+        'account_level' => AccountLevel::Admin,
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.inventory.purchase-request'));
+
+    $response->assertOk();
+    $response->assertDontSee('Import from Approved Purchase Request (PR)');
+});
+
+test('admin can receive po items imported from approved pr and record batches with pr number', function () {
+    $admin = User::factory()->create([
+        'account_level' => AccountLevel::Admin,
+    ]);
+
+    $office = Office::factory()->create([
+        'office_name' => 'Health Services Office',
+        'office_code' => 'PHSO',
+    ]);
+
+    $variant = InventoryItemVariant::factory()->create([
+        'variant_name' => 'Digital Thermometer Infrared',
+        'unit' => 'unit',
+        'unit_cost' => 950.00,
+        'quantity' => 5,
+        'available_for_transfer' => 5,
+    ]);
+
+    $pr = PurchaseRequest::factory()->approved()->create([
+        'pr_number' => 'PR-202610-9911',
+        'office_id' => $office->id,
+        'purpose' => 'Clinic clinic triage instruments',
+        'total_estimated_cost' => 19000.00,
+    ]);
+
+    PurchaseRequestItem::factory()->create([
+        'purchase_request_id' => $pr->id,
+        'inventory_item_variant_id' => $variant->id,
+        'item_name' => 'Digital Thermometer Infrared',
+        'quantity_requested' => 20,
+        'estimated_unit_cost' => 950.00,
+        'estimated_total_cost' => 19000.00,
+    ]);
+
+    $payload = [
+        'office_id' => $office->id,
+        'po_number' => 'PO-2026-9911',
+        'supplier' => 'MediEquip Solutions Inc.',
+        'pr_number' => $pr->pr_number,
+        'remarks' => 'Delivered per Approved PR PR-202610-9911 (Health Services Office)',
+        'delivery_date' => now()->toDateString(),
+        'items' => [
+            [
+                'variant_id' => $variant->id,
+                'quantity' => 20,
+                'unit_cost' => 950.00,
+                'remarks' => 'Imported from PR',
+            ],
+        ],
+    ];
+
+    $response = $this->actingAs($admin)->post(route('admin.inventory.purchase-request.store'), $payload);
+    $response->assertRedirect(route('admin.inventory.purchase-request'));
+
+    $variant->refresh();
+    expect($variant->quantity)->toBe(25);
+
+    $batch = InventoryBatch::where('inventory_item_variant_id', $variant->id)->latest()->first();
+    expect($batch)->not->toBeNull()
+        ->and($batch->office_id)->toBe($office->id)
+        ->and($batch->quantity_received)->toBe(20)
+        ->and($batch->po_number)->toBe('PO-2026-9911')
+        ->and($batch->pr_number)->toBe('PR-202610-9911');
+});
+
+test('receiving an item inserts the necessary data on stock card including office, PO number, unit, and item code', function () {
+    $admin = User::factory()->admin()->create();
+
+    $office = Office::create([
+        'office_name' => 'Provincial General Services Office',
+        'office_code' => 'PGSO',
+    ]);
+
+    $variant = InventoryItemVariant::factory()->create([
+        'variant_name' => 'Lenovo ThinkPad E14 Laptop',
+        'item_code' => 'IT-LAP-555',
+        'unit' => 'unit',
+        'quantity' => 0,
+        'unit_cost' => 45000.00,
+    ]);
+
+    $payload = [
+        'po_number' => 'PO-2026-PGSO-101',
+        'office_id' => $office->id,
+        'delivery_date' => '2026-10-21',
+        'remarks' => 'Office delivery batch',
+        'items' => [
+            [
+                'variant_id' => $variant->id,
+                'quantity' => 12,
+                'unit_cost' => 45000.00,
+                'remarks' => 'Received brand new laptops',
+            ],
+        ],
+    ];
+
+    $response = $this->actingAs($admin)->post(route('admin.inventory.purchase-request.store'), $payload);
+    $response->assertRedirect(route('admin.inventory.purchase-request'));
+
+    // Check that office-specific stock card was created with correct data
+    $officeCard = StockCard::where('inventory_item_variant_id', $variant->id)
+        ->where('office_id', $office->id)
+        ->first();
+
+    expect($officeCard)->not->toBeNull();
+    expect($officeCard->office)->toBe('Provincial General Services Office');
+    expect($officeCard->unit)->toBe('unit');
+    expect($officeCard->stock_no)->toBe('IT-LAP-555');
+    expect($officeCard->item_name)->toBe('Lenovo ThinkPad E14 Laptop');
+
+    // Check entry on the office stock card
+    $officeEntry = $officeCard->entries()->first();
+    expect($officeEntry)->not->toBeNull();
+    expect($officeEntry->reference)->toBe('PO-2026-PGSO-101');
+    expect($officeEntry->issue_to)->toBe('PGSO');
+    expect((float) $officeEntry->receipt_qty)->toBe(12.0);
+    expect((float) $officeEntry->balance_qty)->toBe(12.0);
+    expect($officeEntry->remarks)->toBeNull();
+
+    // Verify that the consolidated card (All Offices) was also updated with the receipt
+    $consolidatedCard = StockCard::where('inventory_item_variant_id', $variant->id)
+        ->whereNull('office_id')
+        ->first();
+    expect($consolidatedCard)->not->toBeNull();
+    $conEntry = $consolidatedCard->entries()->first();
+    expect($conEntry)->not->toBeNull()
+        ->and($conEntry->reference)->toBe('PO-2026-PGSO-101')
+        ->and((float) $conEntry->balance_qty)->toBe(12.0);
+});
+
+test('PO delivery receipt automatically stores air number into the inventory_batches database table', function () {
+    $admin = User::factory()->admin()->create();
+    $variant = InventoryItemVariant::create([
+        'variant_name' => 'Marker Whiteboard Blue',
+        'barcode' => 'BAR-MK-001',
+        'sku' => 'SKU-MK-001',
+        'quantity' => 10,
+        'available_for_transfer' => 10,
+        'unit' => 'pcs',
+        'unit_cost' => 45.00,
+        'status' => 'In Stock',
+    ]);
+
+    $poNumber = 'PO-2026-AIR-STORE-101';
+    $customAir = 'AIR-2026-CUSTOM-99';
+
+    $payload = [
+        'po_number' => $poNumber,
+        'air_number' => $customAir,
+        'supplier' => 'Office Supply Hub',
+        'delivery_date' => now()->toDateString(),
+        'items' => [
+            [
+                'variant_id' => $variant->id,
+                'quantity' => 20,
+                'unit_cost' => 45.00,
+            ],
+        ],
+    ];
+
+    $response = $this->actingAs($admin)->post(route('admin.inventory.purchase-request.store'), $payload);
+    $response->assertRedirect();
+
+    $this->assertDatabaseHas('inventory_batches', [
+        'po_number' => $poNumber,
+        'air_number' => $customAir,
+        'supplier' => 'Office Supply Hub',
+    ]);
+});
+
+test('generating iar form for existing batch without air number persists generated air number into database', function () {
+    $admin = User::factory()->admin()->create();
+    $variant = InventoryItemVariant::create([
+        'variant_name' => 'Staple Wire #35',
+        'barcode' => 'BAR-ST-002',
+        'sku' => 'SKU-ST-002',
+        'quantity' => 30,
+        'available_for_transfer' => 30,
+        'unit' => 'boxes',
+        'unit_cost' => 25.00,
+        'status' => 'In Stock',
+    ]);
+
+    $poNumber = 'PO-2026-8833';
+
+    $batch = InventoryBatch::create([
+        'batch_number' => 'BATCH-20261023-001',
+        'inventory_item_variant_id' => $variant->id,
+        'po_number' => $poNumber,
+        'air_number' => null,
+        'supplier' => 'Crown Paper Supplies',
+        'quantity_received' => 50,
+        'quantity_remaining' => 50,
+        'unit_cost' => 25.00,
+        'status' => 'active',
+    ]);
+
+    expect($batch->air_number)->toBeNull();
+
+    // Access IAR form which triggers auto-generation
+    $response = $this->actingAs($admin)->get(route('admin.inventory.iar-form', ['po' => $poNumber]));
+    $response->assertOk();
+
+    // Verify batch was updated in DB with generated AIR number
+    $batch->refresh();
+    expect($batch->air_number)->not->toBeNull();
+    expect($batch->air_number)->toStartWith('AIR-');
+
+    $this->assertDatabaseHas('inventory_batches', [
+        'id' => $batch->id,
+        'po_number' => $poNumber,
+        'air_number' => $batch->air_number,
+    ]);
+});
+
+test('admin can update and store air number into database via save-air endpoint', function () {
+    $admin = User::factory()->admin()->create();
+    $variant = InventoryItemVariant::create([
+        'variant_name' => 'Correction Tape 5mm',
+        'barcode' => 'BAR-CT-003',
+        'sku' => 'SKU-CT-003',
+        'quantity' => 15,
+        'available_for_transfer' => 15,
+        'unit' => 'pcs',
+        'unit_cost' => 35.00,
+        'status' => 'In Stock',
+    ]);
+
+    $poNumber = 'PO-2026-9922';
+
+    $batch = InventoryBatch::create([
+        'batch_number' => 'BATCH-20261023-002',
+        'inventory_item_variant_id' => $variant->id,
+        'po_number' => $poNumber,
+        'air_number' => 'AIR-2026-OLD-01',
+        'supplier' => 'Metro Supplies',
+        'quantity_received' => 20,
+        'quantity_remaining' => 20,
+        'unit_cost' => 35.00,
+        'status' => 'active',
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.inventory.iar.save-air'), [
+        'air_number' => 'AIR-2026-UPDATED-888',
+        'po_number' => $poNumber,
+        'batch_id' => $batch->id,
+    ]);
+
+    $response->assertOk();
+    $response->assertJson([
+        'success' => true,
+        'air_number' => 'AIR-2026-UPDATED-888',
+    ]);
+
+    $this->assertDatabaseHas('inventory_batches', [
+        'id' => $batch->id,
+        'air_number' => 'AIR-2026-UPDATED-888',
+    ]);
 });

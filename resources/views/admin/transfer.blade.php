@@ -594,7 +594,7 @@
             top: 24px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .live-card-header {
@@ -1037,6 +1037,43 @@
 <body>
     <x-sidebar>
         <div class="transfer-content-area">
+            @php
+                $allVariantsList = isset($variants) && $variants->isNotEmpty()
+                    ? $variants
+                    : (isset($items) ? $items->flatMap->variants : collect());
+
+                $variantDropdownOptions = [];
+                $variantsCatalogData = [];
+
+                foreach ($allVariantsList as $v) {
+                    $parent = $v->inventoryItem;
+                    $vName = $v->variant_name;
+                    $iName = $parent?->name;
+                    $displayName = ($iName && $iName !== $vName) ? "{$iName} — {$vName}" : $vName;
+                    $avail = (int) ($v->available_for_transfer ?? 0);
+                    $unit = $v->effective_unit;
+                    $code = $v->item_code ?: ($v->sku ?: ($v->barcode ?: 'VAR-'.$v->id));
+                    $loc = $v->location ?: ($parent?->location ?: 'Main Warehouse');
+
+                    $variantDropdownOptions[] = [
+                        'id' => (string) $v->id,
+                        'name' => $displayName,
+                        'details' => "Code: {$code} • Avail: {$avail} {$unit} • {$loc}",
+                    ];
+
+                    $variantsCatalogData[$v->id] = [
+                        'id' => (int) $v->id,
+                        'variantName' => $vName,
+                        'itemName' => $iName ?: $vName,
+                        'unit' => $unit,
+                        'available' => $avail,
+                        'barcode' => (string) ($v->barcode ?: ''),
+                        'sku' => (string) ($v->sku ?: ''),
+                    ];
+                }
+
+                $totalTransferAvailable = $allVariantsList->sum('available_for_transfer');
+            @endphp
 
             <!-- Page Header -->
             <div class="page-header">
@@ -1058,11 +1095,6 @@
                         </svg>
                         <span>Warehouse Items: <strong>{{ $items->count() }}</strong></span>
                     </div>
-                    @php
-                        $totalTransferAvailable = $items->sum(function ($item) {
-                            return $item->variants->sum('available_for_transfer');
-                        });
-                    @endphp
                     <div class="stat-pill">
                         <svg style="width: 14px; height: 14px; color: #16a34a;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="20 6 9 17 4 12"></polyline>
@@ -1225,7 +1257,13 @@
                                                     <button type="button" 
                                                             class="btn-add-transfer" 
                                                             id="addBtn-{{ $variant->id }}"
-                                                            onclick="stageVariant({{ $variant->id }}, {{ json_encode($variant->variant_name) }}, {{ json_encode($item->name) }}, {{ json_encode($variant->effective_unit) }}, {{ $variant->available_for_transfer }}, {{ json_encode($variant->barcode) }})">
+                                                            data-variant-id="{{ $variant->id }}"
+                                                            data-variant-name="{{ $variant->variant_name }}"
+                                                            data-item-name="{{ $item->name }}"
+                                                            data-unit="{{ $variant->effective_unit }}"
+                                                            data-available="{{ $variant->available_for_transfer }}"
+                                                            data-barcode="{{ $variant->barcode }}"
+                                                            onclick="stageVariant(Number(this.dataset.variantId), this.dataset.variantName, this.dataset.itemName, this.dataset.unit, Number(this.dataset.available), this.dataset.barcode)">
                                                         <svg style="width: 13px; height: 13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                                             <line x1="12" y1="5" x2="12" y2="19"></line>
                                                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1335,6 +1373,25 @@
 
                         <!-- Staged Items Section -->
                         <div class="live-card-body">
+                            <!-- Variant Selection Dropdown Search Component -->
+                            {{-- <div class="office-select-field" style="margin-bottom: 14px;">
+                                <label class="office-select-label" for="variantPickerSelect" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Select Variant to Transfer</span>
+                                    <span style="font-size: 0.6875rem; color: #2563eb; font-weight: 600; text-transform: none; letter-spacing: normal;">Quick Add by Name, Code, or SKU</span>
+                                </label>
+                                <x-dropdown-search 
+                                    name="stage_variant_picker"
+                                    id="variantPickerSelect"
+                                    :options="$variantDropdownOptions"
+                                    valueKey="id"
+                                    labelKey="name"
+                                    subtextKey="details"
+                                    placeholder="-- Search & select variant to transfer --"
+                                    searchPlaceholder="Type variant name, barcode, or SKU..."
+                                    :allowClear="true"
+                                />
+                            </div> --}}
+
                             <div class="staged-section-header">
                                 <span class="staged-section-title">
                                     <span>Staged for Transfer</span>
@@ -1378,7 +1435,7 @@
                             </div>
 
                             <!-- Hidden Form for POST submission -->
-                            <form id="transferForm" method="POST" action="{{ route('admin.transfers.store') }}" onsubmit="return validateBeforeSubmit()">
+                            <form id="transferForm" method="POST" action="{{ route('admin.transfers.store') }}" onsubmit="validateBeforeSubmit(event); return false;">
                                 @csrf
                                 <input type="hidden" name="office_id" id="formOfficeId" value="{{ $selectedOfficeId ?? '' }}">
                                 <div id="formTransfersInputs">
@@ -1416,7 +1473,7 @@
                             @if($oi->variant)
                                 {
                                     variantName: @json($oi->variant->variant_name),
-                                    itemName: @json($oi->variant->inventoryItem?->name ?? 'Item'),
+                                    itemName: @json($oi->variant->inventoryItem?->name ?? $oi->variant->variant_name),
                                     quantity: {{ (int) ($oi->quantity ?? 1) }},
                                     unit: @json($oi->variant->effective_unit)
                                 },
@@ -1426,6 +1483,8 @@
                 },
             @endforeach
         };
+
+        const variantsCatalogData = @json($variantsCatalogData);
 
         // Reactive Application State
         let selectedOfficeId = @json($selectedOfficeId ?? '');
@@ -1442,6 +1501,24 @@
                     document.getElementById('formOfficeId').value = selectedOfficeId;
                     updateOfficeUI();
                     updateSummaryAndSubmitState();
+                });
+            }
+
+            const variantPicker = document.getElementById('variantPickerSelect');
+            if (variantPicker) {
+                variantPicker.addEventListener('change', () => {
+                    const vId = variantPicker.value;
+                    if (!vId) return;
+                    const vData = variantsCatalogData[vId];
+                    if (vData) {
+                        stageVariant(vData.id, vData.variantName, vData.itemName, vData.unit, vData.available, vData.barcode);
+                        // Reset dropdown selection immediately so user can easily search and add the next variant
+                        const wrapper = variantPicker.closest('.pgso-dropdown-search-wrapper');
+                        if (wrapper) {
+                            const clearBtn = wrapper.querySelector('.pgso-ds-clear-btn');
+                            if (clearBtn) clearBtn.click();
+                        }
+                    }
                 });
             }
 
@@ -1529,6 +1606,11 @@
                     triggerBtn.focus();
                     triggerBtn.click();
                 }
+                return;
+            }
+
+            if (available <= 0) {
+                showToast(`⚠️ '${variantName}' has no available stock to transfer.`);
                 return;
             }
 
@@ -1699,21 +1781,56 @@
         }
 
         // Validate & Inject hidden inputs before submit
-        function validateBeforeSubmit() {
+        async function validateBeforeSubmit(e) {
+            if (e && e.preventDefault) {
+                e.preventDefault();
+            }
+
             if (!selectedOfficeId) {
-                alert('Please select a target office.');
+                if (window.showAlert) {
+                    showAlert({
+                        type: 'warning',
+                        title: 'Target Office Required',
+                        message: 'Please select a destination office from the dropdown before confirming the transfer.',
+                        confirmText: 'Understood'
+                    });
+                } else {
+                    alert('Please select a target office.');
+                }
                 return false;
             }
 
             if (stagedItems.length === 0) {
-                alert('Please stage at least one item variant for transfer.');
+                if (window.showAlert) {
+                    showAlert({
+                        type: 'warning',
+                        title: 'No Items Staged',
+                        message: 'Please stage at least one item variant for transfer before submitting.',
+                        confirmText: 'Understood'
+                    });
+                } else {
+                    alert('Please stage at least one item variant for transfer.');
+                }
                 return false;
             }
 
             const officeName = officesData[selectedOfficeId]?.name || 'the selected office';
             const totalUnits = stagedItems.reduce((acc, curr) => acc + curr.quantity, 0);
 
-            if (!confirm(`Are you sure you want to transfer ${totalUnits} units (${stagedItems.length} variants) to ${officeName}? This will deduct them from Available for Transfer.`)) {
+            let confirmed = false;
+            if (window.showConfirm) {
+                confirmed = await showConfirm({
+                    type: 'warning',
+                    title: 'Confirm Office Stock Transfer',
+                    message: `Are you sure you want to transfer ${totalUnits} units (${stagedItems.length} variants) to ${officeName}? This will deduct them from Available for Transfer and log the transaction.`,
+                    confirmText: 'Yes, Transfer Stock',
+                    cancelText: 'Cancel'
+                });
+            } else {
+                confirmed = confirm(`Are you sure you want to transfer ${totalUnits} units (${stagedItems.length} variants) to ${officeName}? This will deduct them from Available for Transfer.`);
+            }
+
+            if (!confirmed) {
                 return false;
             }
 
@@ -1735,6 +1852,7 @@
                 container.appendChild(qtyInput);
             });
 
+            document.getElementById('transferForm').submit();
             return true;
         }
 

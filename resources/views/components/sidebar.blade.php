@@ -310,7 +310,19 @@
                     <span>Inventory Items</span>
                 </a>
 
-                <!-- Requisitions / Issuance -->
+                <!-- Supplies & Deliveries -->
+                <a href="{{ route('admin.inventory.purchase-request') }}" 
+                   class="nav-link-item {{ request()->is('admin/inventory/purchase-request*') || request()->is('admin/inventory/insert-purchase-request*') || request()->is('deliveries*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="16" height="13" x="1" y="3" rx="2"/>
+                        <path d="M16 8h4l3 3v5h-7V8z"/>
+                        <circle cx="5.5" cy="18.5" r="2.5"/>
+                        <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                    <span>PO Deliveries</span>
+                </a>
+
+                                <!-- Requisitions / Issuance -->
                 <a href="{{ Route::has('admin.requisitions.index') ? route('admin.requisitions.index') : url('/admin/requisitions') }}" 
                    class="nav-link-item {{ request()->is('admin/requisition*') || request()->is('requisitions*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -327,19 +339,6 @@
                     @if($pendingReqBadge > 0)
                         <span class="nav-badge-count" style="background-color: #09090b; color: #ffffff; font-weight: 700;">{{ $pendingReqBadge }}</span>
                     @endif
-                </a>
-
-
-                <!-- Supplies & Deliveries -->
-                <a href="{{ route('admin.inventory.purchase-request') }}" 
-                   class="nav-link-item {{ request()->is('admin/inventory/purchase-request*') || request()->is('admin/inventory/insert-purchase-request*') || request()->is('deliveries*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect width="16" height="13" x="1" y="3" rx="2"/>
-                        <path d="M16 8h4l3 3v5h-7V8z"/>
-                        <circle cx="5.5" cy="18.5" r="2.5"/>
-                        <circle cx="18.5" cy="18.5" r="2.5"/>
-                    </svg>
-                    <span>PO Deliveries</span>
                 </a>
             </div>
 
@@ -387,8 +386,8 @@
                 </a>
 
                 <!-- Reports -->
-                <a href="{{ Route::has('reports.index') ? route('reports.index') : '#' }}" 
-                   class="nav-link-item {{ request()->is('reports*') ? 'active' : '' }}">
+                <a href="{{ Route::has('admin.reports.index') ? route('admin.reports.index') : (Route::has('reports.index') ? route('reports.index') : url('/admin/reports')) }}" 
+                   class="nav-link-item {{ request()->is('admin/reports*') || request()->is('reports*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="20" x2="18" y2="10"/>
                         <line x1="12" y1="20" x2="12" y2="4"/>
@@ -461,4 +460,6 @@
             {{ $slot }}
         </main>
     @endif
+
+    <x-alert-modal />
 </div>

@@ -71,11 +71,11 @@ class InventoryLog extends Model
     }
 
     /**
-     * Get the parent inventory item.
+     * Legacy relationship to parent inventory item.
      */
     public function inventoryItem(): BelongsTo
     {
-        return $this->belongsTo(InventoryItem::class);
+        return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
     }
 
     /**

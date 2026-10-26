@@ -735,7 +735,8 @@
                                                 type="button" 
                                                 class="action-icon-btn" 
                                                 title="Edit Office"
-                                                onclick="openEditOfficeModal({{ json_encode($office) }})"
+                                                data-office="{{ json_encode($office) }}"
+                                                onclick="openEditOfficeModal(JSON.parse(this.dataset.office))"
                                             >
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -747,7 +748,9 @@
                                                 type="button" 
                                                 class="action-icon-btn danger" 
                                                 title="Delete Office"
-                                                onclick="openDeleteOfficeModal({{ $office->id }}, {{ json_encode($office->office_name) }})"
+                                                data-office-id="{{ $office->id }}"
+                                                data-office-name="{{ $office->office_name }}"
+                                                onclick="openDeleteOfficeModal(this.dataset.officeId, this.dataset.officeName)"
                                             >
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <polyline points="3 6 5 6 21 6"></polyline>

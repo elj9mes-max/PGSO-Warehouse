@@ -1,9 +1,12 @@
 <?php
 
+use App\Models\InventoryBatch;
 use App\Models\InventoryItem;
 use App\Models\InventoryItemVariant;
 use App\Models\Office;
 use App\Models\OfficeInventory;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
 use App\Models\RequisitionRequest;
 use App\Models\RequisitionRequestItem;
 use App\Models\User;
@@ -30,7 +33,7 @@ test('staff user sees requisition page with RIS and PR selection cards', functio
     $response = $this->actingAs($staff)->get(route('staff.requisition.index'));
 
     $response->assertOk();
-    $response->assertSeeText('Create a Requisition');
+    $response->assertSeeText('RIS and Common terms');
     $response->assertSee("Provincial Assessor's Office");
     $response->assertSeeText('OFF-PAS-001');
 
@@ -39,8 +42,8 @@ test('staff user sees requisition page with RIS and PR selection cards', functio
     $response->assertSeeText('Create RIS Request');
     $response->assertSee(route('staff.requisition.ris'));
 
-    $response->assertSeeText('Purchase Request (PR)');
-    $response->assertSeeText('Create PR Request');
+    $response->assertSeeText('Common Terms for PR');
+    $response->assertSeeText('Browse Common Items');
     $response->assertSee(route('staff.requisition.pr'));
 });
 
@@ -317,8 +320,9 @@ test('staff user sees inventory item variants on PR page showing only variant na
     $response->assertSeeText('A4 Ream (500 Sheets)');
     $response->assertSeeText('Copy Paper Multipurpose 80gsm');
     $response->assertSeeText('SKU-A4-500S');
-    $response->assertSeeText('BAR-88001122');
-    $response->assertSeeText('Add to PR');
+    $response->assertDontSeeText('Add to PR');
+    $response->assertSeeText('Common Terms & Items Directory');
+    $response->assertSeeText('Est. Unit Cost');
 
     // Confirm internal warehouse location is hidden from view
     $response->assertDontSeeText('RACK-SEC-99-HIDDEN');
@@ -402,4 +406,306 @@ test('staff user can submit Purchase Request creating records in purchase_reques
         'status' => 'pending',
         'purpose' => 'Procurement of examination gloves for community medical missions',
     ]);
+});
+
+test('staff user can access printable PR form matching the official government template', function () {
+    $office = Office::create([
+        'office_name' => 'PGSO',
+        'office_code' => 'PGSO-001',
+    ]);
+
+    $staff = User::factory()->staff()->forOffice($office)->create();
+
+    $response = $this->actingAs($staff)->get(route('staff.requisition.pr-form'));
+
+    $response->assertOk();
+    $response->assertSeeText('Republic of the Philippines');
+    $response->assertSeeText('PROVINCIAL GOVERNMENT OF AURORA');
+    $response->assertSeeText('PURCHASE REQUEST');
+    $response->assertSeeText('Item Description');
+    $response->assertSee('Stock');
+    $response->assertSee('Number');
+    $response->assertSee('Unit Cost');
+    $response->assertSee('Total Cost');
+    $response->assertSee('TOTAL');
+    $response->assertSee('Purpose:');
+    $response->assertSee('Charging:');
+    $response->assertSee('Requested by:');
+    $response->assertSee('Approved by:');
+    $response->assertSee('HON. ISIDRO P. GALBAN');
+    $response->assertSee('GOVERNOR');
+});
+
+test('staff user can access printable PR form populated with specific purchase request items', function () {
+    $office = Office::create([
+        'office_name' => 'Provincial General Services Office',
+        'office_code' => 'PGSO',
+    ]);
+
+    $staff = User::factory()->staff()->forOffice($office)->create([
+        'first_name' => 'Ricardo',
+        'last_name' => 'Bautista',
+    ]);
+
+    $pr = PurchaseRequest::create([
+        'pr_number' => 'PR-2026-PGSO-0042',
+        'office_id' => $office->id,
+        'user_id' => $staff->id,
+        'status' => 'pending',
+        'purpose' => 'FOR USE OF PGSO',
+        'responsibility_center_code' => '1061 1-09-01-020',
+        'requested_by_name' => 'RICARDO Q. BAUTISTA',
+        'requested_by_designation' => 'PGDH-PGSO',
+        'approved_by_name' => 'HON. ISIDRO P. GALBAN',
+        'approved_by_designation' => 'GOVERNOR',
+        'total_estimated_cost' => 1000000.00,
+    ]);
+
+    PurchaseRequestItem::create([
+        'purchase_request_id' => $pr->id,
+        'item_name' => 'SUPPLY & DELIVERY OF COMPUTER SOFTWARE',
+        'description' => 'Upgrading of Property & Supply Management Information Software',
+        'unit' => 'lot',
+        'quantity_requested' => 1,
+        'estimated_unit_cost' => 1000000.00,
+        'estimated_total_cost' => 1000000.00,
+    ]);
+
+    $response = $this->actingAs($staff)->get(route('staff.requisition.pr-form', ['pr' => $pr->id]));
+
+    $response->assertOk();
+    $response->assertSee('PR-2026-PGSO-0042');
+    $response->assertSee('FOR USE OF PGSO');
+    $response->assertSee('1061 1-09-01-020');
+    $response->assertSeeText('SUPPLY & DELIVERY OF COMPUTER SOFTWARE');
+    $response->assertSeeText('Upgrading of Property & Supply Management Information Software');
+    $response->assertSee('1,000,000.00');
+    $response->assertSee('RICARDO Q. BAUTISTA');
+    $response->assertSee('HON. ISIDRO P. GALBAN');
+});
+
+test('unauthenticated user cannot access printable PR form', function () {
+    $response = $this->get(route('staff.requisition.pr-form'));
+
+    $response->assertRedirect(route('login'));
+});
+
+test('submitting RIS request correctly resolves variant when office inventory ID collides with another variant ID', function () {
+    $office = Office::create([
+        'office_name' => 'Provincial General Services Office',
+        'office_code' => 'PGSO',
+    ]);
+
+    $staff = User::factory()->staff()->forOffice($office)->create([
+        'first_name' => 'Ricardo',
+        'last_name' => 'Bautista',
+    ]);
+
+    // Variant 1: Alcohol
+    $alcoholItem = InventoryItem::create([
+        'item_code' => 'ITM-ALC-01',
+        'name' => 'ALCOHOL, Ethyl',
+        'category' => 'Medical Supplies',
+        'unit' => 'bottles',
+        'quantity' => 100,
+        'reorder_level' => 5,
+        'unit_cost' => 50.00,
+    ]);
+
+    $alcoholVariant = InventoryItemVariant::create([
+        'inventory_item_id' => $alcoholItem->id,
+        'variant_name' => 'ALCOHOL, Ethyl, 500 mL',
+        'barcode' => 'BAR-ALC-500',
+        'sku' => 'SKU-ALC-500',
+        'unit' => 'bottles',
+        'quantity' => 100,
+        'unit_cost' => 50.00,
+    ]);
+
+    // Another variant that will collide if looked up by office inventory ID
+    $wrappingItem = InventoryItem::create([
+        'item_code' => 'ITM-WRAP-01',
+        'name' => 'WRAPPING PAPER',
+        'category' => 'Supplies',
+        'unit' => 'rolls',
+        'quantity' => 50,
+        'reorder_level' => 5,
+        'unit_cost' => 15.00,
+    ]);
+
+    $wrappingVariant = InventoryItemVariant::create([
+        'inventory_item_id' => $wrappingItem->id,
+        'variant_name' => 'WRAPPING PAPER Heavy Duty',
+        'barcode' => 'BAR-WRAP-01',
+        'sku' => 'SKU-WRAP-01',
+        'unit' => 'rolls',
+        'quantity' => 50,
+        'unit_cost' => 15.00,
+    ]);
+
+    // Create office inventory for Alcohol
+    $officeInventory = OfficeInventory::create([
+        'office_id' => $office->id,
+        'inventory_item_variants_id' => $alcoholVariant->id,
+        'quantity' => 25,
+    ]);
+
+    // Submit payload with explicit variant_id and office_inventory_id
+    $payload = [
+        'purpose' => 'Office disinfection protocol',
+        'items' => [
+            [
+                'id' => $alcoholVariant->id,
+                'variant_id' => $alcoholVariant->id,
+                'office_inventory_id' => $officeInventory->id,
+                'name' => 'ALCOHOL, Ethyl',
+                'variant' => 'ALCOHOL, Ethyl, 500 mL',
+                'sku' => 'SKU-ALC-500',
+                'unit' => 'bottles',
+                'cost' => 50.00,
+                'quantity' => 2,
+            ],
+        ],
+    ];
+
+    $response = $this->actingAs($staff)->postJson(route('staff.requisition.ris.store'), $payload);
+
+    $response->assertOk();
+    $response->assertJson([
+        'success' => true,
+    ]);
+
+    // Assert that ALCOHOL was saved, NOT WRAPPING PAPER
+    $this->assertDatabaseHas('requisition_request_items', [
+        'inventory_item_variant_id' => $alcoholVariant->id,
+        'item_name' => 'ALCOHOL, Ethyl',
+        'variant_name' => 'ALCOHOL, Ethyl, 500 mL',
+        'quantity_requested' => 2,
+    ]);
+
+    $this->assertDatabaseMissing('requisition_request_items', [
+        'inventory_item_variant_id' => $wrappingVariant->id,
+    ]);
+});
+
+test('staff can update RIS details including AIR number, PO number, and Supplier via patch', function () {
+    $office = Office::create([
+        'office_name' => 'Provincial Engineering Office',
+        'office_code' => 'OFF-PEO-001',
+    ]);
+
+    $staff = User::factory()->staff()->forOffice($office)->create();
+
+    $requisition = RequisitionRequest::create([
+        'request_number' => 'RIS-2026-10-9999',
+        'request_type' => 'RIS',
+        'office_id' => $office->id,
+        'user_id' => $staff->id,
+        'status' => 'pending',
+        'purpose' => 'Office maintenance',
+        'responsibility_center_code' => '1061',
+        'requested_by_name' => $staff->full_name,
+    ]);
+
+    $response = $this->actingAs($staff)->patchJson(route('staff.requisition.ris-details.update', ['requisition' => $requisition->id]), [
+        'air_number' => 'AIR-2026-0042',
+        'po_number' => 'PO-2026-0918',
+        'supplier' => 'Goldmine Office Supplies Inc.',
+        'division' => 'Civil Works Division',
+        'responsibility_center_code' => '1061',
+        'ris_no' => 'RIS-2026-10-9999',
+        'sai_no' => 'SAI-2026-015',
+        'purpose' => 'Updated official operational supplies',
+    ]);
+
+    $response->assertOk();
+    $response->assertJson([
+        'success' => true,
+        'message' => 'RIS details updated successfully.',
+    ]);
+
+    $this->assertDatabaseHas('requisition_requests', [
+        'id' => $requisition->id,
+        'air_number' => 'AIR-2026-0042',
+        'po_number' => 'PO-2026-0918',
+        'supplier' => 'Goldmine Office Supplies Inc.',
+        'division' => 'Civil Works Division',
+        'sai_no' => 'SAI-2026-015',
+        'purpose' => 'Updated official operational supplies',
+    ]);
+});
+
+test('RIS form view auto-fills air number, po number, and supplier from batch if empty', function () {
+    $office = Office::create([
+        'office_name' => 'Provincial General Services Office',
+        'office_code' => 'OFF-PGSO-001',
+    ]);
+
+    $staff = User::factory()->staff()->forOffice($office)->create();
+
+    $variant = InventoryItemVariant::create([
+        'variant_name' => 'A4 Bond Paper Ream',
+        'barcode' => 'BAR-A4-001',
+        'sku' => 'SKU-A4-001',
+        'quantity' => 100,
+        'available_for_transfer' => 100,
+        'unit' => 'reams',
+        'unit_cost' => 250.00,
+        'status' => 'In Stock',
+    ]);
+
+    InventoryBatch::create([
+        'batch_number' => 'BATCH-2026-999',
+        'air_number' => 'AIR-2026-0042',
+        'inventory_item_variant_id' => $variant->id,
+        'office_id' => $office->id,
+        'po_number' => 'PO-2026-4411',
+        'supplier' => 'Aurora Paper Mills Co.',
+        'quantity_received' => 100,
+        'quantity_remaining' => 100,
+        'unit_cost' => 250.00,
+        'status' => 'active',
+    ]);
+
+    $requisition = RequisitionRequest::create([
+        'request_number' => 'RIS-2026-10-8888',
+        'request_type' => 'RIS',
+        'office_id' => $office->id,
+        'user_id' => $staff->id,
+        'status' => 'pending',
+        'purpose' => 'Regular printing',
+        'air_number' => null,
+        'po_number' => null,
+        'supplier' => null,
+    ]);
+
+    RequisitionRequestItem::create([
+        'requisition_request_id' => $requisition->id,
+        'inventory_item_variant_id' => $variant->id,
+        'stock_no' => 'SKU-A4-001',
+        'item_name' => 'A4 Bond Paper',
+        'variant_name' => 'A4 Bond Paper Ream',
+        'unit' => 'reams',
+        'quantity_requested' => 10,
+        'quantity_issued' => 0,
+        'unit_cost' => 250.00,
+        'total_cost' => 2500.00,
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($staff)->get(route('staff.requisition.ris-form', ['requisition' => $requisition->id]));
+    $response->assertOk();
+
+    // Verify requisition was automatically updated with batch's air_number (NOT batch_number)
+    $this->assertDatabaseHas('requisition_requests', [
+        'id' => $requisition->id,
+        'air_number' => 'AIR-2026-0042',
+        'po_number' => 'PO-2026-4411',
+        'supplier' => 'Aurora Paper Mills Co.',
+    ]);
+
+    // Verify AIR number appears on rendered RIS page, not the batch number
+    $response->assertSee('AIR-2026-0042');
+    $response->assertSee('PO-2026-4411');
+    $response->assertSee('Aurora Paper Mills Co.');
 });

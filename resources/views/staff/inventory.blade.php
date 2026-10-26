@@ -1676,7 +1676,7 @@
                     $item = $variant?->inventoryItem;
                     $itemName = $item?->name ?? 'Uncataloged Item';
                     $variantName = $variant?->variant_name ?? 'Standard Edition';
-                    $category = $item?->category ?? 'General Supplies';
+                    $category = $variant?->effective_category ?? ($item?->categoryModel?->name ?? ($item?->category ?? 'General Supplies'));
                     $sku = $variant?->sku ?: ($variant?->barcode ?: ($item?->item_code ?: 'N/A'));
                     $barcode = $variant?->barcode ?: 'N/A';
                     $itemCode = $item?->item_code ?: 'N/A';
@@ -1761,12 +1761,12 @@
                         </div>
 
                         <!-- Stock Status Badge Top-Right -->
-                        <div class="hero-badge-top-right">
+                        {{-- <div class="hero-badge-top-right">
                             <span class="status-badge {{ $statusBadgeClass }}">
                                 <span class="status-indicator-dot {{ $dotClass }}"></span>
                                 <span>{{ $status }}</span>
                             </span>
-                        </div>
+                        </div> --}}
 
                         <!-- Visual Category Icon -->
                         <div class="hero-category-icon-wrap" style="color: {{ $iconColor }};">
@@ -1821,10 +1821,10 @@
                         </div>
 
                         <!-- Product Title -->
-                        <h2 class="product-title" title="{{ $itemName }}">{{ $itemName }}</h2>
+                        <h2 class="product-title" title="{{ $variantName }}">{{ $variantName }}</h2>
 
                         <!-- Variant Spec Subtitle -->
-                        <p class="variant-spec-label" title="{{ $variantName }}">{{ $variantName }}</p>
+                        <p class="variant-spec-label" title="{{ $itemName }}">{{ $itemName }}</p>
 
                         <!-- Storage Location -->
                         <div class="card-location-row">
@@ -1841,7 +1841,7 @@
                                     <span class="stock-large-num">{{ number_format($oi->quantity) }}</span>
                                     <span class="stock-unit-label">{{ $unit }}</span>
                                 </div>
-                                <span class="stock-threshold-label">Min: {{ $reorderLevel }} {{ $unit }}</span>
+                                {{-- <span class="stock-threshold-label">Min: {{ $reorderLevel }} {{ $unit }}</span> --}}
                             </div>
                             <div class="progress-track" title="{{ $oi->quantity }} {{ $unit }} available (Threshold: {{ $reorderLevel }})">
                                 <div class="progress-fill {{ $progressClass }}" style="width: {{ $stockPercent }}%;"></div>
@@ -1935,7 +1935,7 @@
                         <div class="modal-stat-val" id="modalUnitCost">₱0.00</div>
                     </div>
                     <div class="modal-stat-item">
-                        <div class="modal-stat-label">Line Value</div>
+                        <div class="modal-stat-label">Total Cost</div>
                         <div class="modal-stat-val" id="modalTotalVal">₱0.00</div>
                     </div>
                 </div>
@@ -1943,17 +1943,17 @@
                 <!-- Detailed Specs Grid -->
                 <div class="modal-details-grid">
                     <div class="modal-detail-cell">
-                        <div class="modal-detail-label">SKU Code</div>
+                        <div class="modal-detail-label">Item Code</div>
                         <div class="modal-detail-val modal-detail-mono" id="modalSku">N/A</div>
                     </div>
-                    <div class="modal-detail-cell">
+                    {{-- <div class="modal-detail-cell">
                         <div class="modal-detail-label">Barcode</div>
                         <div class="modal-detail-val modal-detail-mono" id="modalBarcode">N/A</div>
                     </div>
                     <div class="modal-detail-cell">
                         <div class="modal-detail-label">Master Item Code</div>
                         <div class="modal-detail-val modal-detail-mono" id="modalItemCode">N/A</div>
-                    </div>
+                    </div> --}}
                     <div class="modal-detail-cell">
                         <div class="modal-detail-label">Stock Status</div>
                         <div class="modal-detail-val" id="modalStatus">In Stock</div>
@@ -2196,15 +2196,15 @@
 
             // Quick View Modal Logic
             function openQuickView(data) {
-                document.getElementById('modalTitle').textContent = data.name || 'Catalog Item';
+                document.getElementById('modalTitle').textContent = data.variant || 'Catalog Item';
                 document.getElementById('modalVariant').textContent = data.variant || '';
                 document.getElementById('modalCategoryTag').textContent = data.category || 'General';
                 document.getElementById('modalStockQuantity').textContent = `${data.quantity} ${data.unit}`;
                 document.getElementById('modalUnitCost').textContent = data.cost || '₱0.00';
                 document.getElementById('modalTotalVal').textContent = data.total || '₱0.00';
                 document.getElementById('modalSku').textContent = data.sku || 'N/A';
-                document.getElementById('modalBarcode').textContent = data.barcode || 'N/A';
-                document.getElementById('modalItemCode').textContent = data.itemcode || 'N/A';
+                // document.getElementById('modalBarcode').textContent = data.barcode || 'N/A';
+                // document.getElementById('modalItemCode').textContent = data.itemcode || 'N/A';
                 document.getElementById('modalStatus').textContent = data.status || 'In Stock';
                 document.getElementById('modalReorder').textContent = `${data.reorder} ${data.unit}`;
                 document.getElementById('modalLocation').textContent = data.location || 'General Storage';

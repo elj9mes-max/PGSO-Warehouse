@@ -726,22 +726,22 @@
             padding: 0 4px;
         }
 
-        /* ================= DOUBLE-WIDTH SLIDE-OVER SIDE CART DRAWER (Fits 2 cards per row) ================= */
+        /* ================= FULL-WIDTH SLIDE-OVER RIS REQUEST CART DRAWER ================= */
         .side-cart-col {
             position: fixed;
             top: 0;
+            left: 0;
             right: 0;
             bottom: 0;
-            height: 93vh;
-            width: 1060px;
-            max-width: 96vw;
-            background: #ffffff;
-            border-left: 1px solid var(--border-subtle);
+            width: 100vw;
+            max-width: 100vw;
+            height: calc(100vh - 68px);
+            background: #f8fafc;
             display: flex;
             flex-direction: column;
             box-shadow: -10px 0 45px rgba(0, 0, 0, 0.16);
             z-index: 300;
-            transform: translateX(105%);
+            transform: translateX(100%);
             transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -764,50 +764,55 @@
         }
 
         .side-cart-header {
-            padding: 18px 24px;
+            padding: 18px 36px;
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #f8fafc;
+            background: #ffffff;
+            flex-shrink: 0;
         }
 
         .cart-header-title {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .cart-header-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             background: #ecfdf5;
             color: #059669;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.15);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15);
+            flex-shrink: 0;
         }
 
         .cart-header-icon svg {
-            width: 19px;
-            height: 19px;
+            width: 22px;
+            height: 22px;
         }
 
         .cart-title-text strong {
-            display: block;
-            font-size: 1rem;
+            display: inline-block;
+            font-size: 1.25rem;
             font-weight: 800;
             color: #09090b;
             line-height: 1.2;
         }
 
-        .cart-title-text span {
-            font-size: 0.6875rem;
-            color: var(--text-muted);
-            font-family: var(--font-mono);
-            letter-spacing: 0.04em;
+        .cart-header-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #059669;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 2px 9px;
+            border-radius: 9999px;
         }
 
         .cart-header-actions {
@@ -816,31 +821,14 @@
             gap: 10px;
         }
 
-        .clear-cart-btn {
-            background: none;
-            border: 1px solid #fee2e2;
-            color: #dc2626;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 8px;
-            transition: all 0.15s ease;
-        }
-
-        .clear-cart-btn:hover {
-            background: #fef2f2;
-            border-color: #fca5a5;
-        }
-
         .drawer-close-btn {
             background: #ffffff;
             border: 1px solid var(--border-subtle);
             color: #64748b;
             cursor: pointer;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -853,205 +841,205 @@
             border-color: #cbd5e1;
         }
 
-        /* Cart Items List Container (2-Column Grid in Double-Width Drawer) */
-        .cart-items-body {
+        /* Cart Body & 2-Column Full-Width Grid */
+        .side-cart-body-wrap {
+            padding: 24px 36px;
             flex: 1;
             overflow-y: auto;
-            padding: 20px 24px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            align-content: start;
-            gap: 14px;
             background: #f8fafc;
         }
 
-        /* Empty Cart State */
-        .cart-empty-state {
-            grid-column: 1 / -1;
-            padding: 70px 20px;
-            text-align: center;
+        .side-cart-body-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 28px;
+            max-width: 1560px;
+            margin: 0 auto;
+            width: 100%;
+            align-items: start;
+        }
+
+        /* Left Pane: Items Review List */
+        .cart-items-pane {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
+            gap: 16px;
         }
 
-        .empty-cart-icon-circle {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: #ffffff;
-            color: #94a3b8;
-            border: 1px solid var(--border-subtle);
+        .cart-items-pane-header {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
-        .empty-cart-icon-circle svg {
-            width: 30px;
-            height: 30px;
-        }
-
-        .empty-cart-title {
-            font-size: 1.0625rem;
+        .cart-pane-title {
+            font-size: 0.9375rem;
             font-weight: 800;
-            color: #1e293b;
+            color: var(--text-primary);
         }
 
-        .empty-cart-desc {
-            font-size: 0.875rem;
-            color: #64748b;
-            max-width: 360px;
-            line-height: 1.55;
+        .cart-pane-hint {
+            font-size: 0.7813rem;
+            color: var(--text-muted);
         }
 
-        /* Cart Item Row Card (Fits 2 cards in one row) */
+        .clear-cart-btn {
+            background: none;
+            border: 1px solid #fee2e2;
+            color: #dc2626;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s ease;
+        }
+
+        .clear-cart-btn:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+
+        .cart-items-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Full-Width Review Row Card */
         .cart-item-card {
             background: #ffffff;
             border: 1.5px solid var(--border-subtle);
             border-radius: 14px;
-            padding: 16px 18px;
+            padding: 16px 20px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            min-height: 136px;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            gap: 20px;
+            transition: all 0.18s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         }
 
         .cart-item-card:hover {
             border-color: #a7f3d0;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.07);
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.08);
+            transform: translateY(-1px);
         }
 
-        .cart-item-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 14px;
-        }
-
-        .cart-item-info {
+        .cart-item-main-header {
             flex: 1;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .cart-item-name {
+        .cart-item-title-text {
             font-size: 0.9375rem;
             font-weight: 700;
             color: #09090b;
             line-height: 1.35;
-            margin-bottom: 3px;
         }
 
-        .cart-item-variant {
+        .cart-item-sub-title {
             font-size: 0.8125rem;
-            color: #475569;
+            color: #64748b;
             font-weight: 500;
-            margin-bottom: 6px;
         }
 
         .cart-item-badges-wrap {
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-top: 4px;
             flex-wrap: wrap;
         }
 
         .cart-item-sku-tag {
             font-family: var(--font-mono);
-            font-size: 0.6875rem;
-            color: #475569;
+            font-size: 0.7188rem;
+            color: #334155;
             background: #f1f5f9;
-            padding: 2px 7px;
-            border-radius: 5px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
             font-weight: 600;
         }
 
         .cart-item-limit-tag {
-            font-size: 0.6875rem;
+            font-size: 0.7188rem;
             color: #065f46;
             background: #ecfdf5;
             border: 1px solid #a7f3d0;
-            padding: 2px 7px;
-            border-radius: 5px;
+            padding: 2px 8px;
+            border-radius: 6px;
             font-weight: 600;
         }
 
-        .cart-item-remove-btn {
+        .cart-item-unit-tag {
+            font-size: 0.7188rem;
+            color: #64748b;
             background: #f8fafc;
             border: 1px solid var(--border-subtle);
-            color: #94a3b8;
-            cursor: pointer;
-            width: 28px;
-            height: 28px;
-            border-radius: 7px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .cart-item-control-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.15s ease;
+            gap: 24px;
             flex-shrink: 0;
-        }
-
-        .cart-item-remove-btn:hover {
-            color: #ef4444;
-            background: #fee2e2;
-            border-color: #fca5a5;
-        }
-
-        .cart-item-bottom {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 10px;
-            border-top: 1px dashed var(--border-subtle);
-            gap: 12px;
-            flex-wrap: wrap;
         }
 
         .cart-item-stepper-wrap {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
+            background: #f8fafc;
+            padding: 4px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
         }
 
         .stepper-label {
-            font-size: 0.75rem;
+            font-size: 0.7188rem;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
+            margin-right: 2px;
         }
 
         .cart-item-stepper {
             display: flex;
             align-items: center;
-            background: #ffffff;
-            border: 1.5px solid var(--border-subtle);
-            border-radius: 9px;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            gap: 4px;
         }
 
         .cart-btn-qty {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
             background: #ffffff;
-            border: none;
-            color: #0f172a;
-            cursor: pointer;
-            font-size: 1.0625rem;
+            color: var(--text-primary);
             font-weight: 700;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.15s ease;
+            transition: all 0.1s ease;
         }
 
         .cart-btn-qty:hover:not(:disabled) {
-            background: #f1f5f9;
+            background: #ecfdf5;
             color: #059669;
+            border-color: #a7f3d0;
         }
 
         .cart-btn-qty:disabled {
@@ -1061,85 +1049,226 @@
         }
 
         .cart-input-qty {
-            width: 44px;
-            height: 32px;
-            border: none;
-            background: transparent;
-            font-family: var(--font-mono);
-            font-size: 0.875rem;
-            font-weight: 800;
+            width: 50px;
+            height: 28px;
             text-align: center;
-            color: #09090b;
-        }
-
-        .cart-input-qty:focus {
-            outline: none;
-            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.8438rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: #ffffff;
         }
 
         .cart-unit-label {
-            font-size: 0.7813rem;
+            font-size: 0.75rem;
+            color: #64748b;
             font-weight: 600;
-            color: #475569;
+            margin-left: 2px;
         }
 
         .cart-item-price-stack {
             text-align: right;
-        }
-
-        .cart-line-subtotal {
-            font-size: 1rem;
-            font-weight: 800;
-            color: #059669;
-            font-family: var(--font-mono);
+            min-width: 95px;
         }
 
         .cart-line-unit-rate {
+            display: block;
             font-size: 0.7188rem;
             color: var(--text-muted);
         }
 
-        /* Cart Footer / Checkout Area */
-        .side-cart-footer {
-            padding: 18px 24px;
-            border-top: 1px solid var(--border-subtle);
+        .cart-line-subtotal {
+            display: block;
+            font-size: 0.9375rem;
+            font-family: var(--font-mono);
+            color: #059669;
+            font-weight: 800;
+        }
+
+        .cart-item-remove-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-item-remove-btn:hover {
+            color: #dc2626;
+            background: #fef2f2;
+        }
+
+        /* Empty Cart State */
+        .cart-empty-state {
+            padding: 70px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
             background: #ffffff;
+            border: 1px dashed var(--border-subtle);
+            border-radius: 16px;
+        }
+
+        .empty-cart-icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-cart-icon-circle svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .empty-cart-title {
+            font-size: 1.125rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .empty-cart-desc {
+            font-size: 0.875rem;
+            color: #64748b;
+            max-width: 380px;
+            line-height: 1.55;
+        }
+
+        .btn-browse-catalog {
+            background: #0f172a;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 9px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-top: 4px;
+        }
+
+        .btn-browse-catalog:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        /* Right Pane: Summary & Purpose (Sticky) */
+        .cart-summary-pane {
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .cart-purpose-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cart-purpose-label {
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .cart-purpose-textarea {
+            width: 100%;
+            height: 90px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-subtle);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            color: var(--text-primary);
+            background: #f8fafc;
+            resize: vertical;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        .cart-purpose-textarea:focus {
+            outline: none;
+            background: #ffffff;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .cart-office-meta-pill {
+            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .cart-office-meta-pill strong {
+            color: var(--text-primary);
+        }
+
+        .cart-totals-summary-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
             display: flex;
             flex-direction: column;
             gap: 14px;
-            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.02);
         }
 
-        .cart-footer-grid {
-            display: grid;
-            grid-template-columns: 1.15fr 1fr;
-            gap: 20px;
-            align-items: start;
-        }
-
-        .cart-summary-block {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: #f8fafc;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border-subtle);
+        .cart-summary-card-title {
+            font-size: 0.9375rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
         .cart-summary-line {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.8125rem;
+            font-size: 0.8438rem;
             color: var(--text-secondary);
+        }
+
+        .cart-summary-line strong {
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-weight: 700;
         }
 
         .cart-summary-total {
             display: flex;
             align-items: baseline;
             justify-content: space-between;
-            padding-top: 8px;
+            padding-top: 12px;
             border-top: 1px dashed var(--border-subtle);
         }
 
@@ -1156,47 +1285,15 @@
             font-family: var(--font-mono);
         }
 
-        .cart-purpose-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .cart-purpose-label {
-            font-size: 0.7188rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .cart-purpose-input {
-            width: 100%;
-            padding: 9px 12px;
-            font-size: 0.8438rem;
-            border: 1.5px solid var(--border-subtle);
-            border-radius: 9px;
-            background: #f8fafc;
-            color: var(--text-primary);
-            font-family: inherit;
-            transition: all 0.2s ease;
-        }
-
-        .cart-purpose-input:focus {
-            outline: none;
-            background: #ffffff;
-            border-color: #059669;
-            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-        }
-
         .cart-action-buttons {
             display: flex;
-            align-items: center;
-            gap: 12px;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
         }
 
         .submit-ris-btn {
-            flex: 1;
+            width: 100%;
             background: #059669;
             color: #ffffff;
             border: none;
@@ -1228,12 +1325,11 @@
         }
 
         .close-drawer-bottom-btn {
-            width: auto;
-            flex-shrink: 0;
+            width: 100%;
             background: #f8fafc;
             color: #475569;
             border: 1px solid var(--border-subtle);
-            padding: 13px 18px;
+            padding: 11px 18px;
             border-radius: 12px;
             font-size: 0.8125rem;
             font-weight: 600;
@@ -1433,27 +1529,20 @@
         }
 
         /* Responsive Breakpoints */
-        @media (max-width: 900px) {
-            .side-cart-col {
-                width: 100vw;
-                max-width: 100vw;
-            }
-
-            .cart-items-body {
+        @media (max-width: 1024px) {
+            .side-cart-body-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
 
-            .cart-footer-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
+            .cart-summary-pane {
+                position: static;
             }
 
-            .cart-action-buttons {
-                flex-direction: column;
-            }
-
-            .close-drawer-bottom-btn {
-                width: 100%;
+            .side-cart-header,
+            .side-cart-body-wrap {
+                padding-left: 20px;
+                padding-right: 20px;
             }
         }
 
@@ -1467,6 +1556,18 @@
                 bottom: 80px;
                 padding: 10px 16px;
                 font-size: 0.8125rem;
+            }
+
+            .cart-item-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+
+            .cart-item-control-row {
+                width: 100%;
+                justify-content: space-between;
+                gap: 12px;
             }
         }
     </style>
@@ -1643,9 +1744,9 @@
                     @php
                         $variant = $oi->variant;
                         $item = $variant?->inventoryItem;
-                        $itemName = $item?->name ?? 'Uncataloged Item';
-                        $variantName = $variant?->variant_name ?? 'Standard Edition';
-                        $category = $item?->category ?? 'General Supplies';
+                        $itemName = $item?->name ?? ($variant?->variant_name ?? 'Uncataloged Item');
+                        $variantName = $variant?->variant_name ?? ($item?->name ?? 'Standard Edition');
+                        $category = $item?->category ?? ($variant?->category ?? 'General Supplies');
                         $sku = $variant?->sku ?: ($variant?->barcode ?: ($item?->item_code ?: 'N/A'));
                         $barcode = $variant?->barcode ?: 'N/A';
                         $unit = $variant?->effective_unit ?? ($variant?->unit ?? ($item?->unit ?? 'units'));
@@ -1653,6 +1754,10 @@
                         $location = $variant?->location ?? ($item?->location ?? 'General Storage');
                         $unitCost = (float) ($variant?->unit_cost ?? ($item?->unit_cost ?? 0));
                         $availableQty = (int) $oi->quantity;
+                        $batch = $variant?->batches?->first(fn ($b) => ! empty($b->air_number)) ?? $variant?->batches?->first();
+                        $airNumber = $batch?->air_number ?? '';
+                        $poNumber = $batch?->po_number ?? '';
+                        $supplier = $batch?->supplier ?? '';
 
                         // Stock status
                         $status = 'In Stock';
@@ -1694,6 +1799,8 @@
                         class="product-card" 
                         id="card_{{ $oi->id }}"
                         data-id="{{ $oi->id }}"
+                        data-office-inventory-id="{{ $oi->id }}"
+                        data-variant-id="{{ $variant?->id }}"
                         data-name="{{ strtolower($itemName) }}"
                         data-variant="{{ strtolower($variantName) }}"
                         data-sku="{{ strtolower($sku) }}"
@@ -1731,8 +1838,10 @@
                                 <span style="font-size: 0.7188rem; color: #64748b; font-weight: 600;">{{ $unit }}</span>
                             </div>
 
-                            <h2 class="product-title" title="{{ $itemName }}">{{ $itemName }}</h2>
-                            <p class="variant-spec-label" title="{{ $variantName }}">{{ $variantName }}</p>
+                            <h2 class="product-title" title="{{ $variantName }}">{{ $variantName }}</h2>
+                            @if($itemName && $itemName !== $variantName)
+                                <p class="variant-spec-label" title="{{ $itemName }}">{{ $itemName }}</p>
+                            @endif
 
                             <div class="card-location-row">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1768,12 +1877,17 @@
                                 id="addBtn_{{ $oi->id }}"
                                 data-add-to-cart
                                 data-id="{{ $oi->id }}"
+                                data-office-inventory-id="{{ $oi->id }}"
+                                data-variant-id="{{ $variant?->id }}"
                                 data-name="{{ $itemName }}"
                                 data-variant="{{ $variantName }}"
                                 data-sku="{{ $sku }}"
                                 data-unit="{{ $unit }}"
                                 data-max="{{ $availableQty }}"
                                 data-cost="{{ $unitCost }}"
+                                data-air-number="{{ $airNumber }}"
+                                data-po-number="{{ $poNumber }}"
+                                data-supplier="{{ $supplier }}"
                                 {{ $availableQty <= 0 ? 'disabled' : '' }}
                             >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -1810,7 +1924,7 @@
     <!-- Drawer Backdrop (Click to Dismiss) -->
     <div class="cart-drawer-backdrop" id="cartBackdrop"></div>
 
-    <!-- ================= WIDE SLIDE-OVER SIDE CART DRAWER (530px) ================= -->
+    <!-- ================= FULL-WIDTH SLIDE-OVER RIS REQUEST CART DRAWER ================= -->
     <aside class="side-cart-col" id="sideCartPanel" aria-label="RIS Requisition Cart Drawer">
         <!-- Cart Header -->
         <div class="side-cart-header">
@@ -1819,78 +1933,111 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
                 </div>
                 <div class="cart-title-text">
-                    <strong>RIS Request Cart</strong>
-                    <span id="cartItemCountLabel">0 ITEMS SELECTED</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <strong>RIS Request Cart</strong>
+                        <span class="cart-header-badge" id="cartItemCountLabel">0 ITEMS SELECTED</span>
+                    </div>
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin: 3px 0 0 0;">Appendix 63 Requisition & Issue Slip • Review items requested, adjust quantities, and provide requisition purpose</p>
                 </div>
             </div>
 
             <div class="cart-header-actions">
-                <button type="button" class="clear-cart-btn" id="clearCartBtn" title="Clear all items in cart">Clear</button>
                 <button type="button" class="drawer-close-btn" id="closeCartBtn" title="Close Cart (Esc)" aria-label="Close Cart">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
         </div>
 
-        <!-- Cart Items Scrollable List (Wide View) -->
-        <div class="cart-items-body" id="cartItemsList">
-            <!-- Dynamic Cart Items Rendered Here via JavaScript -->
-            <div class="cart-empty-state" id="cartEmptyState">
-                <div class="empty-cart-icon-circle">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                </div>
-                <h4 class="empty-cart-title">Your RIS Cart is Empty</h4>
-                <p class="empty-cart-desc">Click <strong>+ Add to Cart</strong> on any stock item in the catalog to build your requisition slip.</p>
-            </div>
-        </div>
-
-        <!-- Cart Footer & Summary (Grid Layout in Double-Width Drawer) -->
-        <div class="side-cart-footer" id="cartFooterArea">
-            <div class="cart-footer-grid">
-                <!-- Purpose / Remarks Input -->
-                <div class="cart-purpose-wrap">
-                    <label class="cart-purpose-label" for="risPurposeInput">Purpose / Requisition Notes</label>
-                    <input 
-                        type="text" 
-                        id="risPurposeInput" 
-                        class="cart-purpose-input" 
-                        placeholder="e.g. Regular office consumption & operations"
-                        value="Official usage for {{ $activeOffice ? $activeOffice->office_name : 'office operations' }}"
-                    >
-                    <span style="font-size: 0.7188rem; color: #64748b; margin-top: 3px;">Printed on the header of the official RIS slip</span>
-                </div>
-
-                <!-- Summary Breakdown Block -->
-                <div class="cart-summary-block">
-                    <div class="cart-summary-line">
-                        <span>Distinct Catalog SKUs:</span>
-                        <strong id="cartSummaryItemsCount">0 items</strong>
+        <!-- Full-Width Body Workspace -->
+        <div class="side-cart-body-wrap">
+            <div class="side-cart-body-grid">
+                <!-- Left Pane: Items Review -->
+                <div class="cart-items-pane">
+                    <div class="cart-items-pane-header">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="cart-pane-title">
+                                Selected Items (<span id="cartItemsCountHeader">0</span>)
+                            </span>
+                            <span class="cart-pane-hint">Review items requested, adjust quantities, or remove items</span>
+                        </div>
+                        <button type="button" class="clear-cart-btn" id="clearCartBtn" title="Clear all items in cart">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>Clear All</span>
+                        </button>
                     </div>
 
-                    <div class="cart-summary-line">
-                        <span>Total Units Requested:</span>
-                        <strong id="cartSummaryTotalUnits">0 units</strong>
+                    <!-- Cart Items Scrollable List -->
+                    <div class="cart-items-body" id="cartItemsList">
+                        <!-- Dynamic Cart Items Rendered Here via JavaScript -->
                     </div>
 
-                    <div class="cart-summary-total">
-                        <strong>Estimated Total Amount:</strong>
-                        <span class="cart-total-amount" id="cartSummaryTotalAmount">₱0.00</span>
+                    <!-- Empty Cart State -->
+                    <div class="cart-empty-state" id="cartEmptyState">
+                        <div class="empty-cart-icon-circle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                        </div>
+                        <h4 class="empty-cart-title">Your RIS Cart is Empty</h4>
+                        <p class="empty-cart-desc">Click <strong>+ Add to Cart</strong> on any stock item in the catalog to build your requisition slip.</p>
+                        <button type="button" class="btn-browse-catalog" onclick="closeCart()">Browse Office Stock</button>
                     </div>
                 </div>
-            </div>
 
-            <div class="cart-action-buttons">
-                <!-- Generate Button -->
-                <button type="button" class="submit-ris-btn" id="generateRisBtn" disabled>
-                    <span>Review & Generate RIS Slip</span>
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </button>
+                <!-- Right Pane: Summary & Purpose -->
+                <div class="cart-summary-pane">
+                    <!-- Purpose Card -->
+                    <div class="cart-purpose-card">
+                        <label class="cart-purpose-label" for="risPurposeInput">
+                            Purpose / Requisition Notes <span style="color: #dc2626;">*</span>
+                        </label>
+                        <textarea 
+                            id="risPurposeInput" 
+                            class="cart-purpose-textarea" 
+                            placeholder="State the official purpose for this requisition (e.g. Regular office consumption & operations)..."
+                        >{{ 'Official usage for ' . ($activeOffice ? $activeOffice->office_name : 'office operations') }}</textarea>
+                        
+                        <div class="cart-office-meta-pill">
+                            <span>Requesting Office: <strong>{{ $activeOffice ? $activeOffice->office_name : 'Central Office' }}</strong></span>
+                            <span>Standard: <strong>Appendix 63 • LGU RIS</strong></span>
+                        </div>
+                    </div>
 
-                <!-- Continue Browsing Button -->
-                <button type="button" class="close-drawer-bottom-btn" id="continueBrowsingBtn">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    <span>Continue Selecting Items</span>
-                </button>
+                    <!-- Summary Totals Card -->
+                    <div class="cart-totals-summary-card">
+                        <div class="cart-summary-card-title">Requisition Summary</div>
+
+                        <div class="cart-summary-line">
+                            <span>Distinct Catalog SKUs</span>
+                            <strong id="cartSummaryItemsCount">0 items</strong>
+                        </div>
+
+                        <div class="cart-summary-line">
+                            <span>Total Units Requested</span>
+                            <strong id="cartSummaryTotalUnits">0 units</strong>
+                        </div>
+
+                        <div class="cart-summary-total">
+                            <div>
+                                <strong>Estimated Total Amount</strong>
+                                <span style="display: block; font-size: 0.7188rem; color: var(--text-muted);">PGSO Inventory Valuation</span>
+                            </div>
+                            <span class="cart-total-amount" id="cartSummaryTotalAmount">₱0.00</span>
+                        </div>
+
+                        <div class="cart-action-buttons">
+                            <!-- Generate Button -->
+                            <button type="button" class="submit-ris-btn" id="generateRisBtn" disabled>
+                                <span>Confirm & Generate RIS Slip</span>
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </button>
+
+                            <!-- Continue Browsing Button -->
+                            <button type="button" class="close-drawer-bottom-btn" id="continueBrowsingBtn">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                <span>Continue Selecting Items</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </aside>
@@ -1932,6 +2079,12 @@
 
                     <div style="margin-bottom: 8px;">
                         <strong>Purpose:</strong> <span id="modalPurposeDisplay">Regular office supplies</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; font-size: 0.8125rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px;">
+                        <div><strong style="color: #475569;">AIR / IAR No:</strong> <span id="modalAirNumberDisplay" style="font-weight: 700; color: #0f172a;">—</span></div>
+                        <div><strong style="color: #475569;">P.O. No:</strong> <span id="modalPoNumberDisplay" style="font-weight: 700; color: #0f172a;">—</span></div>
+                        <div><strong style="color: #475569;">Supplier:</strong> <span id="modalSupplierDisplay" style="font-weight: 700; color: #0f172a;">—</span></div>
                     </div>
 
                     <table class="ris-paper-table">
@@ -1994,7 +2147,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/></svg>
                             <span>Monitor in Request Stat</span>
                         </a>
-                        <a href="{{ route('staff.requisition.ris-form') }}" class="btn-action-view" style="background: #0f172a; color: #ffffff; border: none; padding: 10px 18px; border-radius: 9px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                        <a href="{{ route('staff.requisition.ris-form') }}" id="successPrintRisBtn" class="btn-action-view" style="background: #0f172a; color: #ffffff; border: none; padding: 10px 18px; border-radius: 9px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
                             <span>Print Official Form</span>
                         </a>
@@ -2123,6 +2276,8 @@
                 } else {
                     cart[id] = {
                         id: id,
+                        officeInventoryId: itemData.officeInventoryId || id,
+                        variantId: itemData.variantId || null,
                         name: itemData.name,
                         variant: itemData.variant,
                         sku: itemData.sku,
@@ -2130,6 +2285,9 @@
                         cost: parseFloat(itemData.cost) || 0,
                         max: parseInt(itemData.max) || 1,
                         quantity: 1,
+                        airNumber: itemData.airNumber || '',
+                        poNumber: itemData.poNumber || '',
+                        supplier: itemData.supplier || '',
                     };
                     showToast(`Added "${cart[id].name}" to RIS Cart`);
                 }
@@ -2194,7 +2352,19 @@
                 }
             }
 
-            // Render Side Cart UI (Double-Width 2-Column Grid Layout)
+            function escapeHtml(text) {
+                if (!text) return '';
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return String(text).replace(/[&<>"']/g, m => map[m]);
+            }
+
+            // Render Side Cart UI (Full-Width Review Layout)
             function renderCart() {
                 const itemKeys = Object.keys(cart);
                 const distinctCount = itemKeys.length;
@@ -2223,33 +2393,32 @@
                         itemCard.id = `cartItemRow_${id}`;
 
                         itemCard.innerHTML = `
-                            <div class="cart-item-top">
-                                <div class="cart-item-info">
-                                    <div class="cart-item-name" title="${item.name}">${item.name}</div>
-                                    <div class="cart-item-variant" title="${item.variant}">${item.variant}</div>
-                                    <div class="cart-item-badges-wrap">
-                                        <span class="cart-item-sku-tag">SKU: ${item.sku}</span>
-                                        <span class="cart-item-limit-tag">Stock: ${item.max} ${item.unit}</span>
-                                    </div>
+                            <div class="cart-item-main-header">
+                                <div class="cart-item-title-text" title="${escapeHtml(item.variant)}">${escapeHtml(item.variant)}</div>
+                                ${item.name && item.name !== item.variant ? `<div class="cart-item-sub-title">${escapeHtml(item.name)}</div>` : ''}
+                                <div class="cart-item-badges-wrap">
+                                    <span class="cart-item-sku-tag">SKU: ${escapeHtml(item.sku || 'N/A')}</span>
+                                    <span class="cart-item-limit-tag">Available Stock: ${item.max} ${escapeHtml(item.unit)}</span>
+                                    <span class="cart-item-unit-tag">${escapeHtml(item.unit)}</span>
                                 </div>
-                                <button type="button" class="cart-item-remove-btn" data-cart-remove="${id}" title="Remove this item">
-                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
                             </div>
-                            <div class="cart-item-bottom">
+                            <div class="cart-item-control-row">
                                 <div class="cart-item-stepper-wrap">
                                     <span class="stepper-label">Qty:</span>
                                     <div class="cart-item-stepper">
-                                        <button type="button" class="cart-btn-qty" data-cart-minus="${id}">−</button>
+                                        <button type="button" class="cart-btn-qty" data-cart-minus="${id}" aria-label="Decrease quantity">−</button>
                                         <input type="number" class="cart-input-qty" data-cart-input="${id}" value="${item.quantity}" min="1" max="${item.max}">
-                                        <button type="button" class="cart-btn-qty" data-cart-plus="${id}" ${item.quantity >= item.max ? 'disabled' : ''}>+</button>
+                                        <button type="button" class="cart-btn-qty" data-cart-plus="${id}" ${item.quantity >= item.max ? 'disabled' : ''} aria-label="Increase quantity">+</button>
                                     </div>
-                                    <span class="cart-unit-label">${item.unit}</span>
+                                    <span class="cart-unit-label">${escapeHtml(item.unit)}</span>
                                 </div>
                                 <div class="cart-item-price-stack">
-                                    <div class="cart-line-subtotal">${formatCurrency(lineTotal)}</div>
-                                    <div class="cart-line-unit-rate">${item.quantity} ${item.unit} @ ${formatCurrency(item.cost)}</div>
+                                    <span class="cart-line-unit-rate">${formatCurrency(item.cost)} ea</span>
+                                    <strong class="cart-line-subtotal">${formatCurrency(lineTotal)}</strong>
                                 </div>
+                                <button type="button" class="cart-item-remove-btn" data-cart-remove="${id}" title="Remove this item from RIS Cart">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
                             </div>
                         `;
 
@@ -2260,7 +2429,9 @@
                 // Update summary counters
                 cartTopCounter.textContent = distinctCount;
                 if (floatCartCounter) floatCartCounter.textContent = distinctCount;
-                cartItemCountLabel.textContent = `${distinctCount} ITEMS SELECTED`;
+                const cartItemsCountHeader = document.getElementById('cartItemsCountHeader');
+                if (cartItemsCountHeader) cartItemsCountHeader.textContent = distinctCount;
+                cartItemCountLabel.textContent = distinctCount === 1 ? '1 ITEM SELECTED' : `${distinctCount} ITEMS SELECTED`;
                 cartSummaryItemsCount.textContent = `${distinctCount} item${distinctCount === 1 ? '' : 's'}`;
                 cartSummaryTotalUnits.textContent = `${totalUnits} unit${totalUnits === 1 ? '' : 's'}`;
                 cartSummaryTotalAmount.textContent = formatCurrency(totalCost);
@@ -2285,12 +2456,17 @@
                 if (addBtn && !addBtn.disabled) {
                     addToCart({
                         id: addBtn.dataset.id,
+                        officeInventoryId: addBtn.dataset.officeInventoryId || addBtn.dataset.id,
+                        variantId: addBtn.dataset.variantId || null,
                         name: addBtn.dataset.name,
                         variant: addBtn.dataset.variant,
                         sku: addBtn.dataset.sku,
                         unit: addBtn.dataset.unit,
                         cost: addBtn.dataset.cost,
                         max: addBtn.dataset.max,
+                        airNumber: addBtn.dataset.airNumber || '',
+                        poNumber: addBtn.dataset.poNumber || '',
+                        supplier: addBtn.dataset.supplier || '',
                     });
                     return;
                 }
@@ -2506,6 +2682,34 @@
                 modalTotalUnitsTd.textContent = totalUnits;
                 modalTotalCostTd.textContent = formatCurrency(totalCost);
 
+                // Auto-resolve AIR, PO, and Supplier from cart items
+                let resolvedAir = '';
+                let resolvedPo = '';
+                let resolvedSupplier = '';
+                itemKeys.forEach(id => {
+                    if (!resolvedAir && cart[id].airNumber) resolvedAir = cart[id].airNumber;
+                    if (!resolvedPo && cart[id].poNumber) resolvedPo = cart[id].poNumber;
+                    if (!resolvedSupplier && cart[id].supplier) resolvedSupplier = cart[id].supplier;
+                });
+
+                const modalAirDisplay = document.getElementById('modalAirNumberDisplay');
+                if (modalAirDisplay) modalAirDisplay.textContent = resolvedAir || '— (Auto-resolved)';
+                const modalPoDisplay = document.getElementById('modalPoNumberDisplay');
+                if (modalPoDisplay) modalPoDisplay.textContent = resolvedPo || '— (Auto-resolved)';
+                const modalSupplierDisplay = document.getElementById('modalSupplierDisplay');
+                if (modalSupplierDisplay) modalSupplierDisplay.textContent = resolvedSupplier || '— (Auto-resolved)';
+
+                // Sync current cart and purpose to sessionStorage whenever modal is generated
+                try {
+                    sessionStorage.setItem('ris_cart_items', JSON.stringify(cart));
+                    sessionStorage.setItem('ris_purpose', purposeText);
+                    sessionStorage.setItem('ris_air_number', resolvedAir);
+                    sessionStorage.setItem('ris_po_number', resolvedPo);
+                    sessionStorage.setItem('ris_supplier', resolvedSupplier);
+                } catch (e) {
+                    console.error('sessionStorage error:', e);
+                }
+
                 // Reset confirm save state on opening modal
                 const confirmSaveBox = document.getElementById('confirmSaveBox');
                 const saveSuccessBanner = document.getElementById('saveSuccessBanner');
@@ -2554,15 +2758,41 @@
                     if (confirmSaveBtnText) confirmSaveBtnText.textContent = 'Saving to Database...';
 
                     const purposeValue = (risPurposeInput ? risPurposeInput.value.trim() : '') || 'Official Office Supply Consumption';
-                    const itemsPayload = itemKeys.map(id => ({
-                        id: cart[id].id,
-                        name: cart[id].name,
-                        variant: cart[id].variant,
-                        sku: cart[id].sku,
-                        unit: cart[id].unit,
-                        cost: cart[id].cost,
-                        quantity: cart[id].quantity
-                    }));
+                    let resolvedAir = '';
+                    let resolvedPo = '';
+                    let resolvedSupplier = '';
+
+                    const itemsPayload = itemKeys.map(id => {
+                        if (!resolvedAir && cart[id].airNumber) resolvedAir = cart[id].airNumber;
+                        if (!resolvedPo && cart[id].poNumber) resolvedPo = cart[id].poNumber;
+                        if (!resolvedSupplier && cart[id].supplier) resolvedSupplier = cart[id].supplier;
+
+                        return {
+                            id: cart[id].variantId || cart[id].id,
+                            variant_id: cart[id].variantId || null,
+                            office_inventory_id: cart[id].officeInventoryId || cart[id].id,
+                            name: cart[id].name,
+                            variant: cart[id].variant,
+                            sku: cart[id].sku,
+                            unit: cart[id].unit,
+                            cost: cart[id].cost,
+                            quantity: cart[id].quantity,
+                            air_number: cart[id].airNumber || null,
+                            po_number: cart[id].poNumber || null,
+                            supplier: cart[id].supplier || null
+                        };
+                    });
+
+                    // Save snapshot to sessionStorage
+                    try {
+                        sessionStorage.setItem('ris_cart_items', JSON.stringify(cart));
+                        sessionStorage.setItem('ris_purpose', purposeValue);
+                        sessionStorage.setItem('ris_air_number', resolvedAir);
+                        sessionStorage.setItem('ris_po_number', resolvedPo);
+                        sessionStorage.setItem('ris_supplier', resolvedSupplier);
+                    } catch (e) {
+                        console.error('sessionStorage error:', e);
+                    }
 
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
@@ -2575,6 +2805,9 @@
                         },
                         body: JSON.stringify({
                             purpose: purposeValue,
+                            air_number: resolvedAir || null,
+                            po_number: resolvedPo || null,
+                            supplier: resolvedSupplier || null,
                             items: itemsPayload
                         })
                     })
@@ -2587,6 +2820,23 @@
                     .then(data => {
                         if (data.success) {
                             showToast(`Saved Requisition ${data.request_number}!`, '✓');
+
+                            const risFormUrl = `${"{{ route('staff.requisition.ris-form') }}"}?requisition=${data.request_id || data.request_number}`;
+
+                            // Preserve confirmed requisition items in sessionStorage
+                            try {
+                                sessionStorage.setItem('ris_cart_items', JSON.stringify(itemsPayload));
+                                sessionStorage.setItem('ris_purpose', purposeValue);
+                                sessionStorage.setItem('ris_no', data.request_number);
+                            } catch (e) {
+                                console.error('sessionStorage error:', e);
+                            }
+
+                            // Update print buttons with direct requisition link
+                            const printOfficialBtn = document.getElementById('successPrintRisBtn');
+                            if (printOfficialBtn) printOfficialBtn.href = risFormUrl;
+                            const openTemplateBtn = document.getElementById('openPrintableRisFormBtn');
+                            if (openTemplateBtn) openTemplateBtn.href = risFormUrl;
 
                             // Clear cart and synchronize grid
                             cart = {};
@@ -2604,8 +2854,13 @@
                             if (saveSuccessBanner) {
                                 saveSuccessBanner.style.display = 'flex';
                                 if (successReqNumberHeading) successReqNumberHeading.textContent = `Requisition ${data.request_number} Saved!`;
-                                if (successReqMessage) successReqMessage.textContent = `Your request has been successfully saved to the database and forwarded for PGSO verification.`;
+                                if (successReqMessage) successReqMessage.textContent = `Your request has been successfully recorded. Redirecting to official RIS form...`;
                             }
+
+                            // Automatically forward to the RIS form with the confirmed requisition data
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url || risFormUrl;
+                            }, 800);
                         } else {
                             alert(data.message || 'Error saving requisition.');
                             confirmSaveRequestBtn.disabled = false;
@@ -2626,8 +2881,15 @@
             const openPrintableRisFormBtn = document.getElementById('openPrintableRisFormBtn');
             if (openPrintableRisFormBtn) {
                 openPrintableRisFormBtn.addEventListener('click', () => {
-                    sessionStorage.setItem('ris_cart_items', JSON.stringify(cart));
-                    sessionStorage.setItem('ris_purpose', (risPurposeInput ? risPurposeInput.value.trim() : '') || 'Official Office Supply Consumption');
+                    if (openPrintableRisFormBtn.getAttribute('href') && openPrintableRisFormBtn.getAttribute('href').includes('?requisition=')) {
+                        return; // Already bound to specific saved requisition
+                    }
+                    try {
+                        sessionStorage.setItem('ris_cart_items', JSON.stringify(cart));
+                        sessionStorage.setItem('ris_purpose', (risPurposeInput ? risPurposeInput.value.trim() : '') || 'Official Office Supply Consumption');
+                    } catch (e) {
+                        console.error('Error saving cart to sessionStorage:', e);
+                    }
                 });
             }
 

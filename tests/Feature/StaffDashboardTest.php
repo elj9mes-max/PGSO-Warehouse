@@ -4,6 +4,7 @@ use App\Models\InventoryItem;
 use App\Models\InventoryItemVariant;
 use App\Models\Office;
 use App\Models\OfficeInventory;
+use App\Models\RequisitionRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -87,4 +88,37 @@ test('staff user accessing dashboard with query params forwards them to inventor
     $followResponse->assertOk();
     $followResponse->assertSeeText('Provincial Engineering Office');
     $followResponse->assertSeeText('OFF-PEO-001');
+});
+
+test('staff bottom nav displays unapproved requests badge on request stat and removes badge from requisitions', function () {
+    $office = Office::create([
+        'office_name' => 'Provincial Health Office',
+        'office_code' => 'OFF-PHO-001',
+    ]);
+
+    $staff = User::factory()->staff()->forOffice($office)->create();
+
+    // Create 3 pending (unapproved) requisition requests
+    RequisitionRequest::factory()->count(3)->create([
+        'office_id' => $office->id,
+        'user_id' => $staff->id,
+        'status' => 'pending',
+    ]);
+
+    // Create 1 approved request (should not be in unapproved count)
+    RequisitionRequest::factory()->create([
+        'office_id' => $office->id,
+        'user_id' => $staff->id,
+        'status' => 'approved',
+    ]);
+
+    $response = $this->actingAs($staff)->get(route('staff.inventory'));
+    $response->assertOk();
+
+    // Requisition item should not have hardcoded "6" badge
+    $response->assertDontSee('<span class="staff-nav-badge">6</span>', false);
+
+    // Request stat should have the unapproved count (3) badge
+    $response->assertSee('<span class="staff-nav-badge staff-nav-badge-pending"', false);
+    $response->assertSee('3');
 });

@@ -2,6 +2,9 @@
 
 use App\Enums\AccountLevel;
 use App\Models\Category;
+use App\Models\InventoryItem;
+use App\Models\InventoryItemVariant;
+use App\Models\Office;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -113,7 +116,7 @@ test('admin can create inventory item with newly added category', function () {
     ]);
 
     $response->assertRedirect(route('admin.inventory'));
-    $this->assertDatabaseHas('inventory_items', [
+    $this->assertDatabaseHas('inventory_item_variants', [
         'item_code' => 'CAM-001',
         'category' => 'Safety & Surveillance',
     ]);
@@ -133,7 +136,7 @@ test('admin can create inventory item with optional location and without initial
     ]);
 
     $response->assertRedirect(route('admin.inventory'));
-    $this->assertDatabaseHas('inventory_items', [
+    $this->assertDatabaseHas('inventory_item_variants', [
         'item_code' => 'TEST-OPT-01',
         'quantity' => 0,
         'unit_cost' => 0.00,
@@ -157,4 +160,52 @@ test('add item modal category field uses searchable dropdown component with sear
     $response->assertSee('id="ds_container_newItemCategory_search"', false);
     $response->assertSee('Search category...', false);
     $response->assertSee('IT Peripherals');
+});
+
+test('inventory item has categoryModel relationship and pr catalog loads categories from category table', function () {
+    $category = Category::firstOrCreate(['name' => 'Medical Logistics']);
+
+    $item = InventoryItem::factory()->create([
+        'category' => 'Medical Logistics',
+    ]);
+
+    expect($item->categoryModel)->not->toBeNull()
+        ->and($item->categoryModel->id)->toBe($category->id)
+        ->and($item->categoryModel->name)->toBe('Medical Logistics');
+
+    $office = Office::create([
+        'office_name' => 'PGSO Office',
+        'office_code' => 'PGSO-001',
+    ]);
+
+    $staff = User::factory()->staff()->forOffice($office)->create();
+
+    $response = $this->actingAs($staff)->get(route('staff.requisition.pr'));
+
+    $response->assertOk();
+    $response->assertSee('Medical Logistics');
+});
+
+test('variant has categoryModel relationship and category has variants relationship', function () {
+    $category = Category::firstOrCreate(['name' => 'IT Equipment']);
+
+    $item = InventoryItem::factory()->create([
+        'category' => 'IT Equipment',
+    ]);
+
+    $variantWithDirectCategory = InventoryItemVariant::factory()->create([
+        'inventory_item_id' => $item->id,
+        'category' => 'IT Equipment',
+    ]);
+
+    $variantWithInheritedCategory = InventoryItemVariant::factory()->create([
+        'inventory_item_id' => $item->id,
+        'category' => null,
+    ]);
+
+    expect($variantWithDirectCategory->categoryModel)->not->toBeNull()
+        ->and($variantWithDirectCategory->categoryModel->id)->toBe($category->id)
+        ->and($variantWithDirectCategory->effective_category)->toBe('IT Equipment')
+        ->and($variantWithInheritedCategory->effective_category)->toBe('IT Equipment')
+        ->and($category->variants->pluck('id'))->toContain($variantWithDirectCategory->id);
 });

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Official Acceptance and Inspection Report (IAR / AIR) Form - Provincial Government of Aurora">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Acceptance and Inspection Report (IAR) - A4 Printable</title>
 
     <!-- Google Fonts -->
@@ -261,6 +262,7 @@
             width: 46px;
             height: 46px;
             display: block;
+            object-fit: contain;
         }
 
         .iar-title-wrapper {
@@ -779,6 +781,10 @@
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 <span>Clear</span>
             </button>
+            <button type="button" class="btn-toolbar btn-toolbar-ghost" id="saveAirBtn" onclick="saveAirNumberToDatabase()" title="Persist AIR number into database" style="border-color: #059669; color: #34d399;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span id="saveAirBtnText">Save AIR No.</span>
+            </button>
         </div>
 
         <div class="toolbar-right">
@@ -822,33 +828,9 @@
 
                 <!-- 1. HEADER (Official Seal + Title) -->
                 <div class="iar-header">
-                    <!-- Provincial Seal of Aurora (Vector SVG) -->
+                    <!-- Provincial Seal of Aurora -->
                     <div class="iar-logo-wrapper">
-                        <svg class="iar-logo-img" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Seal of the Province of Aurora">
-                            <circle cx="50" cy="50" r="48" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-                            <circle cx="50" cy="50" r="44" fill="#0f5132" stroke="#eab308" stroke-width="2" />
-                            <path id="sealTextTop" d="M 16 50 A 34 34 0 0 1 84 50" fill="none" stroke="none" />
-                            <text fill="#ffffff" font-size="7.5" font-weight="bold" font-family="Arial, sans-serif" letter-spacing="1.2">
-                                <textPath href="#sealTextTop" startOffset="50%" text-anchor="middle">LALAWIGAN NG AURORA</textPath>
-                            </text>
-                            <path id="sealTextBottom" d="M 84 50 A 34 34 0 0 1 16 50" fill="none" stroke="none" />
-                            <text fill="#ffffff" font-size="8.5" font-weight="bold" font-family="Arial, sans-serif" letter-spacing="2">
-                                <textPath href="#sealTextBottom" startOffset="50%" text-anchor="middle">★ 1979 ★</textPath>
-                            </text>
-                            <circle cx="50" cy="50" r="28" fill="#ffffff" stroke="#eab308" stroke-width="1.5" />
-                            <clipPath id="iarShieldClip">
-                                <path d="M 32 34 L 68 34 L 68 54 C 68 66 50 72 50 72 C 50 72 32 66 32 54 Z" />
-                            </clipPath>
-                            <g clip-path="url(#iarShieldClip)">
-                                <rect x="32" y="34" width="36" height="20" fill="#1d4ed8" />
-                                <rect x="32" y="54" width="36" height="20" fill="#dc2626" />
-                                <circle cx="50" cy="54" r="8" fill="#facc15" />
-                                <polygon points="32,54 44,45 53,54" fill="#15803d" />
-                                <polygon points="46,54 58,43 68,54" fill="#166534" />
-                                <path d="M 32 62 Q 41 58 50 62 T 68 62 L 68 72 L 32 72 Z" fill="#0284c7" />
-                            </g>
-                            <path d="M 32 34 L 68 34 L 68 54 C 68 66 50 72 50 72 C 50 72 32 66 32 54 Z" fill="none" stroke="#eab308" stroke-width="1.8" />
-                        </svg>
+                        <img src="{{ asset('aurora-logo.png') }}" alt="Seal of the Province of Aurora (LALAWIGAN NG AURORA)" class="iar-logo-img">
                     </div>
 
                     <!-- Centered Title -->
@@ -1098,8 +1080,53 @@
             document.getElementById('checkInspected').textContent = '✓';
         }
 
+        async function saveAirNumberToDatabase() {
+            const airElem = document.getElementById('fieldAirNo');
+            const airNumber = airElem ? airElem.textContent.trim() : '';
+            if (!airNumber) return;
+
+            const saveBtnText = document.getElementById('saveAirBtnText');
+            if (saveBtnText) saveBtnText.textContent = 'Saving...';
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            try {
+                const response = await fetch('{{ route('admin.inventory.iar.save-air') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        air_number: airNumber,
+                        po_number: '{{ $poNumber }}' || null,
+                        batch_id: '{{ $batchId ?? '' }}' || null,
+                    })
+                });
+
+                if (response.ok) {
+                    if (saveBtnText) saveBtnText.textContent = 'Saved ✓';
+                    setTimeout(() => {
+                        if (saveBtnText) saveBtnText.textContent = 'Save AIR No.';
+                    }, 2000);
+                } else {
+                    if (saveBtnText) saveBtnText.textContent = 'Save AIR No.';
+                }
+            } catch (e) {
+                console.error('Error saving AIR number:', e);
+                if (saveBtnText) saveBtnText.textContent = 'Save AIR No.';
+            }
+        }
+
         // Auto-print if query parameter 'print' or server variable autoPrint is set
         window.addEventListener('DOMContentLoaded', () => {
+            const airElem = document.getElementById('fieldAirNo');
+            if (airElem) {
+                airElem.addEventListener('blur', () => {
+                    saveAirNumberToDatabase();
+                });
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('print') === '1' || urlParams.get('autoprint') === '1' || {{ !empty($autoPrint) ? 'true' : 'false' }}) {
                 setTimeout(() => {

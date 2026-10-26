@@ -572,8 +572,8 @@
                 <span>Requisition & Issuance Portal</span>
             </div>
 
-            <h1 class="portal-title">Create a Requisition</h1>
-            <p class="portal-desc">Choose the type of request you wish to submit. Select between an in-stock Requisition and Issue Slip (RIS) or a new procurement Purchase Request (PR).</p>
+            <h1 class="portal-title">RIS and Common terms</h1>
+           
 
             @if($user->office)
                 <div class="office-station-tag">
@@ -608,7 +608,7 @@
                     <p class="card-desc">
                         Select supplies, stationery, consumables, or equipment from available warehouse inventory. Approved items are dispatched directly to your office custody.
                     </p>
-
+{{-- 
                     <ul class="feature-list">
                         <li class="feature-item">
                             <span class="feature-check">
@@ -628,7 +628,7 @@
                             </span>
                             <span>Transfers custody balance to your designated office</span>
                         </li>
-                    </ul>
+                    </ul> --}}
                 </div>
 
                 <div class="btn-action">
@@ -640,51 +640,31 @@
                 </div>
             </a>
 
-            <!-- Card 2: Purchase Request (PR) -->
+            <!-- Card 2: Purchase Request (PR) - Common Items Directory -->
             <a href="{{ route('staff.requisition.pr') }}" class="req-card card-pr" id="selectPrCard">
                 <div>
                     <div class="card-top">
                         <div class="icon-box">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="8" cy="21" r="1"/>
-                                <circle cx="19" cy="21" r="1"/>
-                                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                                <rect width="16" height="20" x="4" y="2" rx="2"/>
+                                <line x1="8" y1="6" x2="16" y2="6"/>
+                                <line x1="8" y1="10" x2="16" y2="10"/>
+                                <line x1="8" y1="14" x2="12" y2="14"/>
                             </svg>
                         </div>
-                        <span class="type-pill">New Procurement</span>
+                        <span class="type-pill">Common Terms Directory</span>
                     </div>
 
                     <span class="form-code">FORM APPENDIX 60 • LGU GAM</span>
-                    <h2 class="card-title">Purchase Request (PR)</h2>
-                    <p class="card-tagline">Request procurement for non-stock items, supplies, or new equipment</p>
+                    <h2 class="card-title">Common Terms for PR</h2>
+                    <p class="card-tagline">Standard directory of common terms of items, codes, and estimated rates</p>
                     <p class="card-desc">
-                        Submit a purchase requisition for items that are out-of-stock or not carried in regular warehouse inventory. Initiates formal canvass, budget allocation, and Purchase Order.
+                        Browse the official catalog of common warehouse supplies, standardized item codes (SKU), units of measure, and estimated unit rates for requisition reference.
                     </p>
-
-                    <ul class="feature-list">
-                        <li class="feature-item">
-                            <span class="feature-check">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span>For unstocked items or new specifications</span>
-                        </li>
-                        <li class="feature-item">
-                            <span class="feature-check">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span>Routes to Budget Office & Bids & Awards (BAC)</span>
-                        </li>
-                        <li class="feature-item">
-                            <span class="feature-check">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span>Generates official Purchase Order (PO) upon approval</span>
-                        </li>
-                    </ul>
                 </div>
 
                 <div class="btn-action">
-                    <span>Create PR Request</span>
+                    <span>Browse Common Items</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
@@ -695,7 +675,7 @@
         </div>
 
         <!-- Decision Helper Info Strip -->
-        <div class="helper-banner">
+        {{-- <div class="helper-banner">
             <div class="helper-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -706,7 +686,7 @@
             <div class="helper-text">
                 <strong>Need help deciding?</strong> If your requested supplies or stationery are already carried and available in the warehouse, choose <strong>RIS</strong> for fast issuance. If the supplies must be purchased from outside suppliers or require budget canvassing, choose <strong>PR</strong>.
             </div>
-        </div>
+        </div> --}}
 
     </main>
 

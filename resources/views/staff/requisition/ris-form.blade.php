@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Official Requisition and Issue Slip (RIS) form template - Provincial Government of Aurora">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Requisition and Issue Slip (RIS) - Provincial Government of Aurora</title>
     
     <!-- Fonts -->
@@ -157,6 +158,7 @@
             height: 70px;
             display: block;
             margin: 0 auto;
+            object-fit: contain;
         }
 
         .ris-title-col {
@@ -456,9 +458,264 @@
                 border-color: #000000 !important;
             }
 
+            .edit-modal-backdrop,
+            .ris-toast {
+                display: none !important;
+            }
+
             [contenteditable="true"] {
                 background: transparent !important;
+                box-shadow: none !important;
             }
+        }
+
+        /* Edit Details Modal Styles */
+        .edit-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 20px;
+        }
+
+        .edit-modal-card {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 640px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .edit-modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            background: #f8fafc;
+        }
+
+        .edit-modal-header h3 {
+            font-size: 1.125rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .edit-modal-header p {
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color 0.15s ease;
+        }
+
+        .btn-close-modal:hover {
+            color: #0f172a;
+        }
+
+        .edit-modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .autofill-banner {
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .autofill-info strong {
+            display: block;
+            font-size: 0.8125rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+
+        .autofill-info span {
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        .btn-autofill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s ease;
+        }
+
+        .btn-autofill:hover {
+            background: #1d4ed8;
+        }
+
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.875rem;
+            color: #0f172a;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .field-hint {
+            font-size: 0.6875rem;
+            color: #94a3b8;
+        }
+
+        .edit-modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f8fafc;
+        }
+
+        .btn-cancel {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-cancel:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-save-modal {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
+            background: #059669;
+            border: none;
+            color: #ffffff;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+            transition: background 0.15s ease;
+        }
+
+        .btn-save-modal:hover {
+            background: #047857;
+        }
+
+        /* Toast Alert */
+        .ris-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            border: 1px solid #334155;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastSlideUp 0.25s ease-out;
+        }
+
+        @keyframes toastSlideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .editable-meta {
+            outline: none;
+            border-radius: 3px;
+            padding: 1px 4px;
+            transition: background 0.15s ease;
+        }
+
+        .editable-meta:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .editable-meta:focus {
+            background: rgba(37, 99, 235, 0.18);
+            box-shadow: 0 0 0 1px #2563eb;
         }
     </style>
 </head>
@@ -472,9 +729,26 @@
                 <span>Back to RIS Inventory</span>
             </a>
             <span class="badge-template">Official LGU Template &bull; Appendix 63</span>
+            @if($requisition)
+                <span class="badge-req" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; font-family: var(--font-mono);">
+                    REQ: {{ $requisition->ris_no ?? $requisition->request_number }}
+                </span>
+            @endif
         </div>
 
         <div class="toolbar-right">
+            <button type="button" class="btn-tool btn-tool-secondary" id="openEditDetailsModalBtn" title="Fill or edit AIR/IAR, PO, Supplier and RIS numbers">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Edit / Fill Details</span>
+            </button>
+
+            @if($requisition)
+                <button type="button" class="btn-tool btn-tool-secondary" id="saveRisDetailsBtn" title="Save changes to database">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span id="saveBtnLabel">Save to DB</span>
+                </button>
+            @endif
+
             <button type="button" class="btn-tool btn-tool-secondary" id="syncCartBtn" title="Sync items selected from the RIS Cart">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
                 <span>Sync from Cart</span>
@@ -500,49 +774,9 @@
                 <!-- HEADER TABLE (Logo + Province Title) -->
                 <table class="ris-header-table">
                     <tr>
-                        <!-- Aurora Provincial Seal Logo (Vector SVG) -->
+                        <!-- Aurora Provincial Seal Logo -->
                         <td class="ris-logo-col">
-                            <svg class="ris-logo-img" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Seal of the Province of Aurora">
-                                <!-- Outer Ring -->
-                                <circle cx="50" cy="50" r="48" fill="#ffffff" stroke="#000000" stroke-width="1.8" />
-                                <circle cx="50" cy="50" r="44" fill="#0f5132" stroke="#eab308" stroke-width="2" />
-                                
-                                <!-- Curved Header Text Simulation -->
-                                <path id="textPathTop" d="M 16 50 A 34 34 0 0 1 84 50" fill="none" stroke="none" />
-                                <text fill="#ffffff" font-size="7.5" font-weight="bold" font-family="Arial, sans-serif" letter-spacing="1.2">
-                                    <textPath href="#textPathTop" startOffset="50%" text-anchor="middle">LALAWIGAN NG AURORA</textPath>
-                                </text>
-
-                                <path id="textPathBottom" d="M 84 50 A 34 34 0 0 1 16 50" fill="none" stroke="none" />
-                                <text fill="#ffffff" font-size="8.5" font-weight="bold" font-family="Arial, sans-serif" letter-spacing="2">
-                                    <textPath href="#textPathBottom" startOffset="50%" text-anchor="middle">★ 1979 ★</textPath>
-                                </text>
-
-                                <!-- Inner Circle with Shield -->
-                                <circle cx="50" cy="50" r="28" fill="#ffffff" stroke="#eab308" stroke-width="1.5" />
-                                
-                                <!-- Shield Colors -->
-                                <clipPath id="shieldClip">
-                                    <path d="M 32 34 L 68 34 L 68 54 C 68 66 50 72 50 72 C 50 72 32 66 32 54 Z" />
-                                </clipPath>
-
-                                <g clip-path="url(#shieldClip)">
-                                    <!-- Blue Top Half -->
-                                    <rect x="32" y="34" width="36" height="20" fill="#1d4ed8" />
-                                    <!-- Red Bottom Half -->
-                                    <rect x="32" y="54" width="36" height="20" fill="#dc2626" />
-                                    <!-- Sun Rays in Center -->
-                                    <circle cx="50" cy="54" r="8" fill="#facc15" />
-                                    <!-- Mountain Silhouettes -->
-                                    <polygon points="32,54 44,45 53,54" fill="#15803d" />
-                                    <polygon points="46,54 58,43 68,54" fill="#166534" />
-                                    <!-- Sea Waves -->
-                                    <path d="M 32 62 Q 41 58 50 62 T 68 62 L 68 72 L 32 72 Z" fill="#0284c7" />
-                                </g>
-
-                                <!-- Shield Outline -->
-                                <path d="M 32 34 L 68 34 L 68 54 C 68 66 50 72 50 72 C 50 72 32 66 32 54 Z" fill="none" stroke="#eab308" stroke-width="1.8" />
-                            </svg>
+                            <img src="{{ asset('aurora-logo.png') }}" alt="Seal of the Province of Aurora" class="ris-logo-img">
                         </td>
 
                         <!-- Heading Titles -->
@@ -670,37 +904,173 @@
         </div>
     </main>
 
-    <!-- JavaScript to Handle Automatic Table Grid, Cart Sync, and Printing -->
+    <!-- Edit RIS Slip Details Modal -->
+    <div class="edit-modal-backdrop" id="editModalBackdrop" style="display: none;">
+        <div class="edit-modal-card">
+            <div class="edit-modal-header">
+                <div>
+                    <h3>Edit RIS Slip Information</h3>
+                    <p>Update AIR / IAR Number, PO Number, Supplier, and administrative metadata</p>
+                </div>
+                <button type="button" class="btn-close-modal" id="closeEditModalBtn" aria-label="Close modal">&times;</button>
+            </div>
+
+            <div class="edit-modal-body">
+                <!-- Auto-fill Banner -->
+                <div class="autofill-banner">
+                    <div class="autofill-info">
+                        <strong>Warehouse Delivery Batches</strong>
+                        <span>Auto-detect AIR/IAR, PO, and Supplier from the items on this requisition.</span>
+                    </div>
+                    <button type="button" class="btn-autofill" id="autoFillFromBatchesBtn">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <span>Auto-fill from Item Batches</span>
+                    </button>
+                </div>
+
+                <div class="modal-form-grid">
+                    <div class="form-group">
+                        <label for="inputAirNumber">AIR / IAR Number</label>
+                        <input type="text" id="inputAirNumber" placeholder="e.g. AIR-2026-001 or IAR-2026-0045" value="{{ $requisition->air_number ?? '' }}">
+                        <span class="field-hint">Acknowledgement of Receipt or Inspection & Acceptance reference</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPoNumber">P.O. Number</label>
+                        <input type="text" id="inputPoNumber" placeholder="e.g. PO-2026-088" value="{{ $requisition->po_number ?? '' }}">
+                        <span class="field-hint">Purchase Order number for the delivered batch</span>
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="inputSupplier">Supplier</label>
+                        <input type="text" id="inputSupplier" placeholder="e.g. Goldmine Office Supplies Inc." value="{{ $requisition->supplier ?? '' }}">
+                        <span class="field-hint">Registered vendor / supplier of goods</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputDivision">Division</label>
+                        <input type="text" id="inputDivision" placeholder="e.g. Administrative Division" value="{{ $requisition->division ?? '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputRespCode">Responsibility Center Code</label>
+                        <input type="text" id="inputRespCode" placeholder="1061" value="{{ $requisition->responsibility_center_code ?? '1061' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputRisNo">RIS No.</label>
+                        <input type="text" id="inputRisNo" placeholder="e.g. 2026-10-0012" value="{{ $requisition->ris_no ?? $requisition->request_number ?? '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputSaiNo">SAI No.</label>
+                        <input type="text" id="inputSaiNo" placeholder="e.g. SAI-2026-004" value="{{ $requisition->sai_no ?? '' }}">
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="inputPurpose">Purpose</label>
+                        <textarea id="inputPurpose" rows="2" placeholder="Official Office Supply Consumption">{{ $requisition->purpose ?? '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="edit-modal-footer">
+                <button type="button" class="btn-cancel" id="cancelEditModalBtn">Cancel</button>
+                <button type="button" class="btn-save-modal" id="applyAndSaveModalBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Apply & Save to Form</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Feedback Toast -->
+    <div class="ris-toast" id="risToast" style="display: none;"></div>
+
+    <!-- JavaScript to Handle Automatic Table Grid, Cart Sync, Editing, and Printing -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('risTableBody');
             const TOTAL_ROWS = 27; // Exactly fills standard letter sheet height
+            let currentItems = [];
 
             // Server-passed requisition data (loaded from database if requested)
             @php
                 $serverRequisitionData = $requisition ? [
+                    'id' => $requisition->id,
                     'risNo' => $requisition->ris_no ?? $requisition->request_number,
                     'purpose' => $requisition->purpose,
+                    'division' => $requisition->division,
+                    'respCode' => $requisition->responsibility_center_code ?? '1061',
+                    'saiNo' => $requisition->sai_no,
                     'airNumber' => $requisition->air_number,
                     'poNumber' => $requisition->po_number,
                     'supplier' => $requisition->supplier,
                     'items' => $requisition->items->map(function ($it) {
+                        $batches = $it->variant?->batches;
+                        $firstBatch = $batches?->first(fn ($b) => ! empty($b->air_number)) ?? $batches?->first();
                         return [
-                            'stockNo' => $it->stock_no ?? $it->variant?->sku ?? '',
+                            'stockNo' => $it->stock_no ?: ($it->variant?->item_code ?: ($it->variant?->sku ?: '')),
                             'unit' => $it->unit ?? $it->variant?->effective_unit ?? 'pcs',
                             'description' => ($it->item_name ?? 'Item') . ($it->variant_name ? ' (' . $it->variant_name . ')' : ''),
                             'quantity' => $it->quantity_requested,
                             'issuedQuantity' => $it->quantity_issued > 0 ? $it->quantity_issued : '',
                             'remarks' => $it->remarks ?? '',
+                            'airNumber' => $firstBatch?->air_number ?? '',
+                            'batchNumber' => $firstBatch?->batch_number,
+                            'poNumber' => $firstBatch?->po_number,
+                            'supplier' => $firstBatch?->supplier,
                         ];
                     })->values()->all(),
                 ] : null;
             @endphp
             const serverRequisition = {!! json_encode($serverRequisitionData) !!};
 
-            // Sample default template data or load from cart
+            // Active State
+            let currentAirNumber = serverRequisition?.airNumber || sessionStorage.getItem('ris_air_number') || '';
+            let currentPoNumber = serverRequisition?.poNumber || sessionStorage.getItem('ris_po_number') || '';
+            let currentSupplier = serverRequisition?.supplier || sessionStorage.getItem('ris_supplier') || '';
+            let currentDivision = serverRequisition?.division || sessionStorage.getItem('ris_division') || (document.getElementById('divisionField')?.textContent.trim() || '');
+            let currentRespCode = serverRequisition?.respCode || sessionStorage.getItem('ris_resp_code') || (document.getElementById('respCodeField')?.textContent.trim() || '1061');
+            let currentRisNo = serverRequisition?.risNo || sessionStorage.getItem('ris_no') || (document.getElementById('risNoField')?.textContent.trim() || '');
+            let currentSaiNo = serverRequisition?.saiNo || sessionStorage.getItem('ris_sai_no') || (document.getElementById('saiNoField')?.textContent.trim() || '');
+            let currentPurpose = serverRequisition?.purpose || sessionStorage.getItem('ris_purpose') || (document.getElementById('purposeContentField')?.textContent.trim() || '');
+
+            // Toast helper
+            function showToast(message, icon = '✓') {
+                const toast = document.getElementById('risToast');
+                if (!toast) return;
+                toast.innerHTML = `<span style="font-size: 1.1rem; color: #34d399;">${icon}</span> <span>${message}</span>`;
+                toast.style.display = 'flex';
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3500);
+            }
+
+            // Detect and auto-resolve empty procurement values from items batches
+            function autoResolveBatchesFromItems(items) {
+                if (!items || items.length === 0) return;
+                for (const it of items) {
+                    if (!currentAirNumber && it.airNumber) {
+                        currentAirNumber = it.airNumber;
+                    }
+                    if (!currentPoNumber && it.poNumber) {
+                        currentPoNumber = it.poNumber;
+                    }
+                    if (!currentSupplier && it.supplier) {
+                        currentSupplier = it.supplier;
+                    }
+                }
+            }
+
+            // Render table rows
             function renderTableRows(items = []) {
+                currentItems = items;
                 tableBody.innerHTML = '';
+
+                // Auto-resolve batch info if fields are blank
+                autoResolveBatchesFromItems(items);
 
                 // Special meta rows indices towards the bottom (AIR NO, PO NO, SUPPLIER)
                 const airRowIndex = TOTAL_ROWS - 6; // Row 21
@@ -708,9 +1078,9 @@
                 const supplierRowIndex = TOTAL_ROWS - 4; // Row 23
                 const dotRowIndex = TOTAL_ROWS - 3; // Row 24
 
-                const airVal = serverRequisition?.airNumber ? ` ${serverRequisition.airNumber}` : '';
-                const poVal = serverRequisition?.poNumber ? ` ${serverRequisition.poNumber}` : '';
-                const supplierVal = serverRequisition?.supplier ? ` ${serverRequisition.supplier}` : '';
+                const airVal = currentAirNumber ? ` ${currentAirNumber}` : '';
+                const poVal = currentPoNumber ? ` ${currentPoNumber}` : '';
+                const supplierVal = currentSupplier ? ` ${currentSupplier}` : '';
 
                 for (let i = 0; i < TOTAL_ROWS; i++) {
                     const tr = document.createElement('tr');
@@ -731,7 +1101,7 @@
                         tr.innerHTML = `
                             <td class="col-stock-no" contenteditable="true"></td>
                             <td class="col-unit" contenteditable="true"></td>
-                            <td class="col-desc special-desc-cell" contenteditable="true">AIR NUMBER:${airVal}</td>
+                            <td class="col-desc special-desc-cell">AIR / IAR NUMBER:<span id="valAir" class="editable-meta" contenteditable="true" title="Click to edit AIR / IAR Number">${airVal}</span></td>
                             <td class="col-req-qty" contenteditable="true"></td>
                             <td class="col-iss-qty" contenteditable="true"></td>
                             <td class="col-remarks" contenteditable="true"></td>
@@ -740,7 +1110,7 @@
                         tr.innerHTML = `
                             <td class="col-stock-no" contenteditable="true"></td>
                             <td class="col-unit" contenteditable="true"></td>
-                            <td class="col-desc special-desc-cell" contenteditable="true">P.O NUMBER:${poVal}</td>
+                            <td class="col-desc special-desc-cell">P.O. NUMBER:<span id="valPo" class="editable-meta" contenteditable="true" title="Click to edit P.O. Number">${poVal}</span></td>
                             <td class="col-req-qty" contenteditable="true"></td>
                             <td class="col-iss-qty" contenteditable="true"></td>
                             <td class="col-remarks" contenteditable="true"></td>
@@ -749,7 +1119,7 @@
                         tr.innerHTML = `
                             <td class="col-stock-no" contenteditable="true"></td>
                             <td class="col-unit" contenteditable="true"></td>
-                            <td class="col-desc special-desc-cell" contenteditable="true">SUPPLIER:${supplierVal}</td>
+                            <td class="col-desc special-desc-cell">SUPPLIER:<span id="valSupplier" class="editable-meta" contenteditable="true" title="Click to edit Supplier">${supplierVal}</span></td>
                             <td class="col-req-qty" contenteditable="true"></td>
                             <td class="col-iss-qty" contenteditable="true"></td>
                             <td class="col-remarks" contenteditable="true"></td>
@@ -784,24 +1154,57 @@
                     const rawCart = sessionStorage.getItem('ris_cart_items');
                     const savedPurpose = sessionStorage.getItem('ris_purpose');
                     const savedRisNo = sessionStorage.getItem('ris_no');
+                    const savedAir = sessionStorage.getItem('ris_air_number');
+                    const savedPo = sessionStorage.getItem('ris_po_number');
+                    const savedSupplier = sessionStorage.getItem('ris_supplier');
+                    const savedDiv = sessionStorage.getItem('ris_division');
+                    const savedResp = sessionStorage.getItem('ris_resp_code');
+                    const savedSai = sessionStorage.getItem('ris_sai_no');
 
                     if (savedPurpose) {
+                        currentPurpose = savedPurpose;
                         const purposeElem = document.getElementById('purposeContentField');
                         if (purposeElem) purposeElem.textContent = savedPurpose;
                     }
 
                     if (savedRisNo) {
+                        currentRisNo = savedRisNo;
                         const risNoElem = document.getElementById('risNoField');
                         if (risNoElem) risNoElem.textContent = savedRisNo;
                     }
 
+                    if (savedDiv) {
+                        currentDivision = savedDiv;
+                        const divElem = document.getElementById('divisionField');
+                        if (divElem) divElem.textContent = savedDiv;
+                    }
+
+                    if (savedResp) {
+                        currentRespCode = savedResp;
+                        const respElem = document.getElementById('respCodeField');
+                        if (respElem) respElem.textContent = savedResp;
+                    }
+
+                    if (savedSai) {
+                        currentSaiNo = savedSai;
+                        const saiElem = document.getElementById('saiNoField');
+                        if (saiElem) saiElem.textContent = savedSai;
+                    }
+
+                    if (savedAir) currentAirNumber = savedAir;
+                    if (savedPo) currentPoNumber = savedPo;
+                    if (savedSupplier) currentSupplier = savedSupplier;
+
                     if (rawCart) {
                         const cartObj = JSON.parse(rawCart);
                         const items = Object.values(cartObj).map(item => ({
-                            stockNo: item.sku || '',
-                            unit: item.unit || '',
-                            description: item.name + (item.variant ? ` (${item.variant})` : ''),
-                            quantity: item.quantity || 1
+                            stockNo: item.sku || item.item_code || item.code || item.stockNo || '',
+                            unit: item.unit || 'pcs',
+                            description: item.name ? (item.variant && item.variant !== item.name ? `${item.name} (${item.variant})` : item.name) : (item.variant || item.description || ''),
+                            quantity: item.quantity || 1,
+                            airNumber: item.air_number || item.airNumber || '',
+                            poNumber: item.po_number || item.poNumber || '',
+                            supplier: item.supplier || '',
                         }));
 
                         renderTableRows(items);
@@ -823,15 +1226,237 @@
                 }
             }
 
+            // Inline edits listening on valAir, valPo, valSupplier
+            document.addEventListener('input', (e) => {
+                if (e.target && e.target.id === 'valAir') {
+                    currentAirNumber = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_air_number', currentAirNumber);
+                } else if (e.target && e.target.id === 'valPo') {
+                    currentPoNumber = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_po_number', currentPoNumber);
+                } else if (e.target && e.target.id === 'valSupplier') {
+                    currentSupplier = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_supplier', currentSupplier);
+                } else if (e.target && e.target.id === 'divisionField') {
+                    currentDivision = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_division', currentDivision);
+                } else if (e.target && e.target.id === 'respCodeField') {
+                    currentRespCode = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_resp_code', currentRespCode);
+                } else if (e.target && e.target.id === 'risNoField') {
+                    currentRisNo = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_no', currentRisNo);
+                } else if (e.target && e.target.id === 'saiNoField') {
+                    currentSaiNo = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_sai_no', currentSaiNo);
+                } else if (e.target && e.target.id === 'purposeContentField') {
+                    currentPurpose = e.target.textContent.trim();
+                    sessionStorage.setItem('ris_purpose', currentPurpose);
+                }
+            });
+
+            // Modal Controls
+            const editModalBackdrop = document.getElementById('editModalBackdrop');
+            const openEditDetailsModalBtn = document.getElementById('openEditDetailsModalBtn');
+            const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+            const cancelEditModalBtn = document.getElementById('cancelEditModalBtn');
+            const applyAndSaveModalBtn = document.getElementById('applyAndSaveModalBtn');
+            const autoFillFromBatchesBtn = document.getElementById('autoFillFromBatchesBtn');
+
+            function openEditModal() {
+                document.getElementById('inputAirNumber').value = currentAirNumber || '';
+                document.getElementById('inputPoNumber').value = currentPoNumber || '';
+                document.getElementById('inputSupplier').value = currentSupplier || '';
+                document.getElementById('inputDivision').value = currentDivision || '';
+                document.getElementById('inputRespCode').value = currentRespCode || '1061';
+                document.getElementById('inputRisNo').value = currentRisNo || '';
+                document.getElementById('inputSaiNo').value = currentSaiNo || '';
+                document.getElementById('inputPurpose').value = currentPurpose || '';
+                editModalBackdrop.style.display = 'flex';
+            }
+
+            function closeEditModal() {
+                editModalBackdrop.style.display = 'none';
+            }
+
+            if (openEditDetailsModalBtn) openEditDetailsModalBtn.addEventListener('click', openEditModal);
+            if (closeEditModalBtn) closeEditModalBtn.addEventListener('click', closeEditModal);
+            if (cancelEditModalBtn) cancelEditModalBtn.addEventListener('click', closeEditModal);
+            if (editModalBackdrop) {
+                editModalBackdrop.addEventListener('click', (e) => {
+                    if (e.target === editModalBackdrop) closeEditModal();
+                });
+            }
+
+            // Auto-fill from batches in modal
+            if (autoFillFromBatchesBtn) {
+                autoFillFromBatchesBtn.addEventListener('click', () => {
+                    let detectedAir = '';
+                    let detectedPo = '';
+                    let detectedSupplier = '';
+
+                    const itemsToCheck = currentItems && currentItems.length > 0 
+                        ? currentItems 
+                        : (serverRequisition?.items || []);
+
+                    for (const it of itemsToCheck) {
+                        if (!detectedAir && it.airNumber) {
+                            detectedAir = it.airNumber;
+                        }
+                        if (!detectedPo && it.poNumber) {
+                            detectedPo = it.poNumber;
+                        }
+                        if (!detectedSupplier && it.supplier) {
+                            detectedSupplier = it.supplier;
+                        }
+                    }
+
+                    if (detectedAir) document.getElementById('inputAirNumber').value = detectedAir;
+                    if (detectedPo) document.getElementById('inputPoNumber').value = detectedPo;
+                    if (detectedSupplier) document.getElementById('inputSupplier').value = detectedSupplier;
+
+                    if (detectedAir || detectedPo || detectedSupplier) {
+                        showToast(`Auto-detected: ${[detectedAir, detectedPo, detectedSupplier].filter(Boolean).join(', ')}`, '⚡');
+                    } else {
+                        showToast('No delivery batch procurement records found on current items.', '⚠️');
+                    }
+                });
+            }
+
+            // Persist to Server via AJAX
+            async function persistDetailsToServer(payload) {
+                if (!serverRequisition || !serverRequisition.id) return;
+
+                const saveBtnLabel = document.getElementById('saveBtnLabel');
+                if (saveBtnLabel) saveBtnLabel.textContent = 'Saving...';
+
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    const url = `{{ url('/requisition/ris-details') }}/${serverRequisition.id}`;
+
+                    const res = await fetch(url, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(`HTTP error ${res.status}`);
+                    }
+
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('RIS details permanently saved to database!', '✓');
+                        if (saveBtnLabel) saveBtnLabel.textContent = 'Saved ✓';
+                        setTimeout(() => {
+                            if (saveBtnLabel) saveBtnLabel.textContent = 'Save to DB';
+                        }, 2500);
+                    }
+                } catch (err) {
+                    console.error('Error saving RIS details:', err);
+                    showToast('Failed to save to database. Changes remain in session.', '⚠️');
+                    if (saveBtnLabel) saveBtnLabel.textContent = 'Save to DB';
+                }
+            }
+
+            // Apply Modal Values
+            if (applyAndSaveModalBtn) {
+                applyAndSaveModalBtn.addEventListener('click', async () => {
+                    currentAirNumber = document.getElementById('inputAirNumber').value.trim();
+                    currentPoNumber = document.getElementById('inputPoNumber').value.trim();
+                    currentSupplier = document.getElementById('inputSupplier').value.trim();
+                    currentDivision = document.getElementById('inputDivision').value.trim();
+                    currentRespCode = document.getElementById('inputRespCode').value.trim();
+                    currentRisNo = document.getElementById('inputRisNo').value.trim();
+                    currentSaiNo = document.getElementById('inputSaiNo').value.trim();
+                    currentPurpose = document.getElementById('inputPurpose').value.trim();
+
+                    // Update DOM elements on sheet
+                    const divField = document.getElementById('divisionField');
+                    if (divField) divField.textContent = currentDivision;
+                    const respField = document.getElementById('respCodeField');
+                    if (respField) respField.textContent = currentRespCode;
+                    const risNoField = document.getElementById('risNoField');
+                    if (risNoField) risNoField.textContent = currentRisNo;
+                    const saiNoField = document.getElementById('saiNoField');
+                    if (saiNoField) saiNoField.textContent = currentSaiNo;
+                    const purpField = document.getElementById('purposeContentField');
+                    if (purpField) purpField.textContent = currentPurpose;
+
+                    // Update table rows
+                    renderTableRows(currentItems);
+
+                    // Save to sessionStorage
+                    sessionStorage.setItem('ris_air_number', currentAirNumber);
+                    sessionStorage.setItem('ris_po_number', currentPoNumber);
+                    sessionStorage.setItem('ris_supplier', currentSupplier);
+                    sessionStorage.setItem('ris_division', currentDivision);
+                    sessionStorage.setItem('ris_resp_code', currentRespCode);
+                    sessionStorage.setItem('ris_no', currentRisNo);
+                    sessionStorage.setItem('ris_sai_no', currentSaiNo);
+                    sessionStorage.setItem('ris_purpose', currentPurpose);
+
+                    // Close modal
+                    closeEditModal();
+
+                    // Save to database if requisition exists
+                    if (serverRequisition && serverRequisition.id) {
+                        await persistDetailsToServer({
+                            air_number: currentAirNumber,
+                            po_number: currentPoNumber,
+                            supplier: currentSupplier,
+                            division: currentDivision,
+                            responsibility_center_code: currentRespCode,
+                            ris_no: currentRisNo,
+                            sai_no: currentSaiNo,
+                            purpose: currentPurpose,
+                        });
+                    } else {
+                        showToast('Applied details to RIS Form!', '✓');
+                    }
+                });
+            }
+
+            // Toolbar Save to DB Button
+            const saveRisDetailsBtn = document.getElementById('saveRisDetailsBtn');
+            if (saveRisDetailsBtn) {
+                saveRisDetailsBtn.addEventListener('click', () => {
+                    const airElem = document.getElementById('valAir');
+                    const poElem = document.getElementById('valPo');
+                    const suppElem = document.getElementById('valSupplier');
+                    const divElem = document.getElementById('divisionField');
+                    const respElem = document.getElementById('respCodeField');
+                    const risNoElem = document.getElementById('risNoField');
+                    const saiNoElem = document.getElementById('saiNoField');
+                    const purpElem = document.getElementById('purposeContentField');
+
+                    persistDetailsToServer({
+                        air_number: (airElem ? airElem.textContent.trim() : currentAirNumber) || null,
+                        po_number: (poElem ? poElem.textContent.trim() : currentPoNumber) || null,
+                        supplier: (suppElem ? suppElem.textContent.trim() : currentSupplier) || null,
+                        division: (divElem ? divElem.textContent.trim() : currentDivision) || null,
+                        responsibility_center_code: (respElem ? respElem.textContent.trim() : currentRespCode) || null,
+                        ris_no: (risNoElem ? risNoElem.textContent.trim() : currentRisNo) || null,
+                        sai_no: (saiNoElem ? saiNoElem.textContent.trim() : currentSaiNo) || null,
+                        purpose: (purpElem ? purpElem.textContent.trim() : currentPurpose) || null,
+                    });
+                });
+            }
+
             // Sync Button Click
             const syncCartBtn = document.getElementById('syncCartBtn');
             if (syncCartBtn) {
                 syncCartBtn.addEventListener('click', () => {
                     const success = loadFromCart();
                     if (success) {
-                        alert('RIS Items successfully synchronized from your active catalog cart!');
+                        showToast('RIS Items synchronized from your active cart!', '✓');
                     } else {
-                        alert('No items currently found in your active RIS cart. Select items from the RIS Inventory page and click "Sync from Cart".');
+                        showToast('No items currently found in your active RIS cart.', '⚠️');
                     }
                 });
             }
@@ -842,11 +1467,11 @@
                 clearRowsBtn.addEventListener('click', () => {
                     if (confirm('Clear all items from this form?')) {
                         renderTableRows([]);
+                        showToast('Cleared all items from form', 'ℹ️');
                     }
                 });
             }
         });
     </script>
-
 </body>
 </html>

@@ -1140,8 +1140,8 @@
                             <!-- Optional Issuance Form Fields -->
                             <div class="issuance-meta-fields">
                                 <div class="meta-field">
-                                    <label for="releaseRecipientInput">Released To / Recipient <span style="font-weight: 400; color: var(--text-muted);">(Optional)</span></label>
-                                    <input type="text" id="releaseRecipientInput" class="meta-input" placeholder="e.g. Juan Dela Cruz / Field Unit">
+                                    <label for="releaseRecipientInput">Released To / Recipient <span style="color: #dc2626;">*</span></label>
+                                    <input type="text" id="releaseRecipientInput" class="meta-input" placeholder="e.g. Juan Dela Cruz / Field Unit" required>
                                 </div>
 
                                 <div class="meta-field">
@@ -1196,10 +1196,10 @@
                             </div>
 
                             <!-- Hidden Form for POST submission -->
-                            <form id="releaseForm" method="POST" action="{{ route('admin.releases.store') }}" onsubmit="return validateBeforeSubmit()">
+                            <form id="releaseForm" method="POST" action="{{ route('admin.releases.store') }}" onsubmit="validateBeforeSubmit(event); return false;">
                                 @csrf
                                 <input type="hidden" name="office_id" id="formOfficeId" value="{{ $selectedOfficeId ?? '' }}">
-                                <input type="hidden" name="recipient" id="formRecipient" value="">
+                                <input type="hidden" name="recipient" id="formRecipient" value="" required>
                                 <input type="hidden" name="purpose" id="formPurpose" value="">
                                 <div id="formReleasesInputs">
                                     <!-- Injected on submit -->
@@ -1252,6 +1252,7 @@
                         @endforeach
                     ]
                 },
+            
             @endforeach
         };
 
@@ -1651,26 +1652,81 @@
         }
 
         // Validate Before Submit Form
-        function validateBeforeSubmit() {
+        let isConfirmedSubmit = false;
+
+        async function validateBeforeSubmit(e) {
+            if (isConfirmedSubmit) return true;
+
+            if (e && e.preventDefault) {
+                e.preventDefault();
+            }
+
             if (!selectedOfficeId) {
-                alert('Please select the releasing office.');
+                if (window.showAlert) {
+                    showAlert({
+                        type: 'warning',
+                        title: 'Office Required',
+                        message: 'Please choose the releasing office before proceeding.'
+                    });
+                } else {
+                    alert('Please select the releasing office.');
+                }
                 return false;
             }
 
             if (stagedItems.length === 0) {
-                alert('Please stage at least one item variant to release.');
+                if (window.showAlert) {
+                    showAlert({
+                        type: 'warning',
+                        title: 'No Items Staged',
+                        message: 'Please stage at least one item variant to release.'
+                    });
+                } else {
+                    alert('Please stage at least one item variant to release.');
+                }
+                return false;
+            }
+
+            const recipientInput = document.getElementById('releaseRecipientInput');
+            const recipientVal = (recipientInput?.value || '').trim();
+            if (!recipientVal) {
+                if (window.showAlert) {
+                    showAlert({
+                        type: 'warning',
+                        title: 'Recipient Required',
+                        message: 'Please enter the recipient (Released To / Recipient) before confirming release.'
+                    });
+                } else {
+                    alert('Please enter the recipient (Released To / Recipient) before confirming release.');
+                }
+                if (recipientInput) {
+                    recipientInput.focus();
+                }
                 return false;
             }
 
             const officeName = officesData[selectedOfficeId]?.name || 'the selected office';
             const totalUnits = stagedItems.reduce((acc, curr) => acc + curr.quantity, 0);
 
-            if (!confirm(`Are you sure you want to release ${totalUnits} units (${stagedItems.length} variants) from ${officeName}? This will permanently deduct them from the office stock and warehouse quantity on hand.`)) {
+            let confirmed = false;
+            if (window.showConfirm) {
+                confirmed = await showConfirm({
+                    type: 'warning',
+                    title: 'Confirm Stock Release',
+                    message: `Are you sure you want to release ${totalUnits} units (${stagedItems.length} variants) from ${officeName}? This will permanently deduct them from office stock and warehouse quantity on hand.`,
+                    confirmText: 'Yes, Release Stocks',
+                    cancelText: 'Cancel'
+                });
+            } else {
+                confirmed = confirm(`Are you sure you want to release ${totalUnits} units (${stagedItems.length} variants) from ${officeName}? This will permanently deduct them from the office stock and warehouse quantity on hand.`);
+            }
+
+            if (!confirmed) {
                 return false;
             }
 
             // Sync recipient and purpose
-            document.getElementById('formRecipient').value = document.getElementById('releaseRecipientInput').value || '';
+            document.getElementById('formRecipient').value = recipientVal;
             document.getElementById('formPurpose').value = document.getElementById('releasePurposeInput').value || '';
 
             // Inject hidden form fields

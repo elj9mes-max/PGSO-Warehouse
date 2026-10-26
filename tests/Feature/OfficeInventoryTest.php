@@ -381,6 +381,7 @@ test('releasing all office items deletes the office inventory record', function 
 
     $response = $this->actingAs($admin)->post(route('admin.releases.store'), [
         'office_id' => $office->id,
+        'recipient' => 'Nurse Joy',
         'releases' => [
             [
                 'variant_id' => $variant->id,
@@ -426,6 +427,7 @@ test('admin cannot release more than office custody quantity', function () {
 
     $response = $this->actingAs($admin)->post(route('admin.releases.store'), [
         'office_id' => $office->id,
+        'recipient' => 'Tourism Staff',
         'releases' => [
             [
                 'variant_id' => $variant->id,
@@ -438,4 +440,181 @@ test('admin cannot release more than office custody quantity', function () {
 
     $variant->refresh();
     expect($variant->quantity)->toBe(50);
+});
+
+test('admin cannot release items without recipient', function () {
+    $admin = User::factory()->create([
+        'account_level' => AccountLevel::Admin,
+    ]);
+
+    $office = Office::create([
+        'office_name' => 'Provincial Engineering Office (PEO)',
+        'office_code' => 'OFF-ENG-005',
+    ]);
+
+    $item = InventoryItem::factory()->create();
+
+    $variant = InventoryItemVariant::create([
+        'inventory_item_id' => $item->id,
+        'variant_name' => 'Wrench Set',
+        'barcode' => 'BAR-WRN-01',
+        'quantity' => 10,
+        'reorder_level' => 1,
+    ]);
+
+    OfficeInventory::create([
+        'office_id' => $office->id,
+        'inventory_item_variants_id' => $variant->id,
+        'quantity' => 5,
+    ]);
+
+    $response = $this->actingAs($admin)->post(route('admin.releases.store'), [
+        'office_id' => $office->id,
+        'recipient' => '',
+        'releases' => [
+            [
+                'variant_id' => $variant->id,
+                'quantity' => 1,
+            ],
+        ],
+    ]);
+
+    $response->assertSessionHasErrors('recipient');
+});
+
+test('transfer page renders item cards with standalone and item variants', function () {
+    $admin = User::factory()->create([
+        'account_level' => AccountLevel::Admin,
+    ]);
+
+    Office::create([
+        'office_name' => 'General Services Office',
+        'office_code' => 'OFF-GSO-001',
+    ]);
+
+    $item = InventoryItem::factory()->create([
+        'name' => 'Laser Jet Cartridge',
+    ]);
+
+    $linkedVariant = InventoryItemVariant::create([
+        'inventory_item_id' => $item->id,
+        'variant_name' => 'Black High Capacity',
+        'barcode' => 'BAR-HP-01',
+        'quantity' => 40,
+        'available_for_transfer' => 40,
+    ]);
+
+    $standaloneVariant = InventoryItemVariant::create([
+        'inventory_item_id' => null,
+        'variant_name' => 'Heavy Duty Stapler Standalone',
+        'barcode' => 'BAR-STP-02',
+        'quantity' => 15,
+        'available_for_transfer' => 15,
+        'category' => 'Office Supplies',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.transfers.index'));
+
+    $response->assertOk();
+    $response->assertSee('Transfer Stocks to Offices');
+    $response->assertSee('Laser Jet Cartridge');
+    $response->assertSee('Black High Capacity');
+    $response->assertSee('Heavy Duty Stapler Standalone');
+    $response->assertSee('BAR-HP-01');
+    $response->assertSee('BAR-STP-02');
+});
+
+test('admin can see update button on office inventory page', function () {
+    $admin = User::factory()->create([
+        'account_level' => AccountLevel::Admin,
+    ]);
+
+    $office = Office::create([
+        'office_name' => 'Provincial Legal Office (PLO)',
+        'office_code' => 'OFF-LGL-001',
+    ]);
+
+    $item = InventoryItem::factory()->create([
+        'name' => 'Legal Paper Ream',
+        'item_code' => 'PPR-LGL-01',
+        'category' => 'Paper Supplies',
+    ]);
+
+    $variant = InventoryItemVariant::create([
+        'inventory_item_id' => $item->id,
+        'variant_name' => '8.5x14 Sub 20',
+        'barcode' => 'BAR-PPR-LGL',
+        'quantity' => 100,
+        'reorder_level' => 10,
+        'unit_cost' => 250.00,
+    ]);
+
+    $officeInventory = OfficeInventory::create([
+        'office_id' => $office->id,
+        'inventory_item_variants_id' => $variant->id,
+        'quantity' => 20,
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.offices.inventory', $office));
+
+    $response->assertOk();
+    $response->assertSee('btn-table-action-edit');
+    $response->assertSee('Update');
+    $response->assertSee('updateItemModal');
+});
+
+test('admin can update office inventory item details and quantity', function () {
+    $admin = User::factory()->create([
+        'account_level' => AccountLevel::Admin,
+    ]);
+
+    $office = Office::create([
+        'office_name' => 'Provincial Legal Office (PLO)',
+        'office_code' => 'OFF-LGL-002',
+    ]);
+
+    $item = InventoryItem::factory()->create([
+        'name' => 'Legal Folder Set',
+        'item_code' => 'FLD-LGL-01',
+        'category' => 'Filing Supplies',
+    ]);
+
+    $variant = InventoryItemVariant::create([
+        'inventory_item_id' => $item->id,
+        'variant_name' => 'Standard Green',
+        'barcode' => 'BAR-FLD-GRN',
+        'quantity' => 50,
+        'reorder_level' => 5,
+        'unit_cost' => 120.00,
+    ]);
+
+    $officeInventory = OfficeInventory::create([
+        'office_id' => $office->id,
+        'inventory_item_variants_id' => $variant->id,
+        'quantity' => 10,
+    ]);
+
+    $response = $this->actingAs($admin)->put(route('admin.offices.inventory.update', [$office, $officeInventory]), [
+        'variant_name' => 'Heavy Duty Expanding Green',
+        'barcode' => 'BAR-FLD-GRN-MOD',
+        'category' => 'Executive Filing',
+        'unit' => 'packs',
+        'unit_cost' => 135.50,
+        'quantity' => 15,
+    ]);
+
+    $response->assertRedirect(route('admin.offices.inventory', $office));
+    $response->assertSessionHas('status');
+
+    $officeInventory->refresh();
+    expect($officeInventory->quantity)->toBe(15);
+
+    $variant->refresh();
+    expect($variant->variant_name)->toBe('Heavy Duty Expanding Green');
+    expect($variant->barcode)->toBe('BAR-FLD-GRN-MOD');
+    expect($variant->unit)->toBe('packs');
+    expect((float) $variant->unit_cost)->toBe(135.50);
+
+    $item->refresh();
+    expect($item->category)->toBe('Executive Filing');
 });

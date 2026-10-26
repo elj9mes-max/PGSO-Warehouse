@@ -605,6 +605,154 @@
             background: #f4f4f5;
         }
 
+        .btn-table-action-edit {
+            color: #0284c7;
+        }
+
+        .btn-table-action-edit:hover {
+            border-color: #0284c7;
+            background-color: #f0f9ff;
+            color: #0369a1;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(9, 9, 11, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background-color: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.97) translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-primary);
+            background-color: #f4f4f5;
+        }
+
+        .modal-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-input {
+            width: 100%;
+            height: 40px;
+            padding: 0 12px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            background-color: #ffffff;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #09090b;
+            box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.05);
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-subtle);
+            background-color: #fafafa;
+            border-radius: 0 0 14px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
         /* Empty State */
         .empty-inventory-state {
             padding: 64px 24px;
@@ -681,6 +829,27 @@
 <body>
     <x-sidebar>
         <div class="office-inventory-area">
+
+            <!-- Flash Alert -->
+            @if(session('status'))
+                <div class="flash-alert" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; padding: 12px 16px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; color: #065f46; font-size: 0.875rem; font-weight: 500;">
+                    <svg style="width: 18px; height: 18px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <span>{{ session('status') }}</span>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="flash-alert" style="margin-bottom: 20px; padding: 12px 16px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; color: #991b1b; font-size: 0.875rem;">
+                    <ul style="margin: 0; padding-left: 18px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <!-- Breadcrumbs Navigation -->
             <nav class="breadcrumb-nav" aria-label="Breadcrumb">
@@ -840,7 +1009,7 @@
                         <thead>
                             <tr>
                                 <th>Item & Variant Details</th>
-                                <th>Barcode / SKU</th>
+                                <th>Barcode</th>
                                 <th>Category</th>
                                 <th>Quantity on Hand</th>
                                 <th>Unit Cost</th>
@@ -869,7 +1038,7 @@
                                     };
                                     $unitCost = (float) ($variant?->unit_cost ?: ($parentItem?->unit_cost ?? 0));
                                     $subTotal = $unitCost * (int) $inv->quantity;
-                                    $searchBlob = strtolower(($variant?->variant_name ?? '') . ' ' . ($parentItem?->name ?? '') . ' ' . ($parentItem?->item_code ?? '') . ' ' . ($variant?->barcode ?? '') . ' ' . ($variant?->sku ?? '') . ' ' . ($parentItem?->category ?? ''));
+                                    $searchBlob = strtolower(($variant?->variant_name ?? '') . ' ' . ($parentItem?->name ?? '') . ' ' . ($parentItem?->item_code ?? '') . ' ' . ($variant?->barcode ?? '') . ' ' . ($parentItem?->category ?? ''));
                                 @endphp
 
                                 <tr class="inv-row" 
@@ -895,9 +1064,9 @@
                                     <td>
                                         <div style="display: flex; flex-direction: column; gap: 3px;">
                                             <span class="code-snippet">{{ $variant?->barcode ?? '—' }}</span>
-                                            @if($variant?->sku)
+                                            {{-- @if($variant?->sku)
                                                 <span style="font-family: var(--font-mono); font-size: 0.6875rem; color: #71717a;">SKU: {{ $variant->sku }}</span>
-                                            @endif
+                                            @endif --}}
                                         </div>
                                     </td>
 
@@ -943,6 +1112,31 @@
                                     <!-- Actions -->
                                     <td style="text-align: right;">
                                         <div class="action-btns-group">
+                                            <!-- Update Item Button -->
+                                            <button type="button" 
+                                                    class="btn-table-action btn-table-action-edit" 
+                                                    title="Update this item"
+                                                    data-item="{{ json_encode([
+                                                        'id' => $inv->id,
+                                                        'quantity' => (int) $inv->quantity,
+                                                        'variant_id' => $variant?->id,
+                                                        'variant_name' => $variant?->variant_name ?? '',
+                                                        'barcode' => $variant?->barcode ?? '',
+                                                        'category' => $parentItem?->category ?? ($variant?->category ?? ''),
+                                                        'unit' => $variant?->effective_unit ?? ($parentItem?->unit ?? 'units'),
+                                                        'unit_cost' => (float) ($variant?->unit_cost ?: ($parentItem?->unit_cost ?? 0)),
+                                                        'parent_item_name' => $parentItem?->name ?? '',
+                                                        'parent_item_code' => $parentItem?->item_code ?? '',
+                                                        'parent_item_id' => $parentItem?->id,
+                                                    ]) }}"
+                                                    onclick="openUpdateItemModal(JSON.parse(this.dataset.item))">
+                                                <svg style="width: 12px; height: 12px; color: #0284c7;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                </svg>
+                                                <span>Update</span>
+                                            </button>
+
                                             @if(($variant?->available_for_transfer ?? 0) > 0)
                                                 <a href="{{ route('admin.transfers.index', ['office' => $office->id]) }}" 
                                                    class="btn-table-action" 
@@ -1003,7 +1197,95 @@
         </div>
     </x-sidebar>
 
-    <!-- Interactive Client Filtering -->
+    <!-- Update Item Details Modal -->
+    <div class="modal-overlay" id="updateItemModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div>
+                    <h2>Update Item Details</h2>
+                    <p style="font-size: 0.75rem; color: #71717a; margin-top: 2px;">
+                        Office Custody: <strong style="color: #09090b;">{{ $office->office_name }}</strong>
+                    </p>
+                </div>
+                <button type="button" class="modal-close-btn" id="closeUpdateItemModalBtn" aria-label="Close modal">
+                    <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="updateItemForm" method="POST" action="">
+                @csrf
+                @method('PUT')
+
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label class="modal-label" for="updateVariantName">Item / Variant Name *</label>
+                        <input type="text" id="updateVariantName" name="variant_name" class="modal-input" required placeholder="e.g. Standard, Blue, 500ml">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="modal-field">
+                            <label class="modal-label" for="updateBarcode">Barcode *</label>
+                            <input type="text" id="updateBarcode" name="barcode" class="modal-input" required placeholder="Barcode / code">
+                        </div>
+                        <div class="modal-field">
+                            <label class="modal-label" for="updateCategory">Category</label>
+                            <input type="text" id="updateCategory" name="category" list="categorySuggestions" class="modal-input" placeholder="e.g. Office Supplies">
+                            <datalist id="categorySuggestions">
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat }}"></option>
+                                @endforeach
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="modal-field">
+                            <label class="modal-label" for="updateQuantity">
+                                Quantity in Office *
+                                <span style="background-color: #dbeafe; color: #1e40af; font-size: 0.6875rem; padding: 1px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px;">Office Stock</span>
+                            </label>
+                            <input type="number" id="updateQuantity" name="quantity" class="modal-input" min="0" required>
+                        </div>
+                        <div class="modal-field">
+                            <label class="modal-label" for="updateUnit">Unit of Measure</label>
+                            <input type="text" id="updateUnit" name="unit" class="modal-input" placeholder="e.g. pieces, boxes, reams">
+                        </div>
+                    </div>
+
+                    <div class="modal-field">
+                        <label class="modal-label" for="updateUnitCost">Unit Cost (₱)</label>
+                        <input type="number" id="updateUnitCost" name="unit_cost" step="0.01" min="0" class="modal-input" placeholder="0.00">
+                    </div>
+
+                    <div id="parentCatalogLinkWrapper" style="display: none; padding-top: 4px;">
+                        <a id="parentCatalogLink" href="#" target="_blank" style="font-size: 0.75rem; color: #2563eb; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            <span>View item in warehouse catalog</span>
+                            <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-outline" id="cancelUpdateItemBtn">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interactive Client Filtering & Modals -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('inventorySearch');
@@ -1048,6 +1330,60 @@
                     activeCat = btn.getAttribute('data-cat');
                     filterRows();
                 });
+            });
+
+            // Update Item Modal Elements & Functions
+            const updateModal = document.getElementById('updateItemModal');
+            const updateForm = document.getElementById('updateItemForm');
+            const closeUpdateBtn = document.getElementById('closeUpdateItemModalBtn');
+            const cancelUpdateBtn = document.getElementById('cancelUpdateItemBtn');
+            const parentLinkWrapper = document.getElementById('parentCatalogLinkWrapper');
+            const parentLink = document.getElementById('parentCatalogLink');
+
+            window.openUpdateItemModal = function(data) {
+                if (!updateForm || !updateModal) return;
+                updateForm.action = `/admin/offices/{{ $office->id }}/inventory/${data.id}`;
+                document.getElementById('updateVariantName').value = data.variant_name || '';
+                document.getElementById('updateBarcode').value = data.barcode || '';
+                document.getElementById('updateCategory').value = data.category || '';
+                document.getElementById('updateQuantity').value = data.quantity !== undefined ? data.quantity : 0;
+                document.getElementById('updateUnit').value = data.unit || '';
+                document.getElementById('updateUnitCost').value = data.unit_cost !== undefined ? data.unit_cost : '';
+
+                if (data.parent_item_id && parentLink && parentLinkWrapper) {
+                    parentLink.href = `/admin/inventory/${data.parent_item_id}`;
+                    parentLinkWrapper.style.display = 'block';
+                } else if (parentLinkWrapper) {
+                    parentLinkWrapper.style.display = 'none';
+                }
+
+                updateModal.classList.add('open');
+                setTimeout(() => {
+                    document.getElementById('updateVariantName').focus();
+                }, 50);
+            };
+
+            function closeUpdateModal() {
+                if (updateModal) {
+                    updateModal.classList.remove('open');
+                }
+            }
+
+            if (closeUpdateBtn) closeUpdateBtn.addEventListener('click', closeUpdateModal);
+            if (cancelUpdateBtn) cancelUpdateBtn.addEventListener('click', closeUpdateModal);
+
+            if (updateModal) {
+                updateModal.addEventListener('click', (e) => {
+                    if (e.target === updateModal) {
+                        closeUpdateModal();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && updateModal && updateModal.classList.contains('open')) {
+                    closeUpdateModal();
+                }
             });
         });
     </script>

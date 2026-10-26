@@ -17,10 +17,18 @@ class Category extends Model
     use HasFactory;
 
     /**
-     * Get the inventory items under this category.
+     * Get the inventory items/variants under this category.
      */
     public function inventoryItems(): HasMany
     {
-        return $this->hasMany(InventoryItem::class, 'category', 'name');
+        return $this->variants();
+    }
+
+    /**
+     * Get the variants under this category.
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(InventoryItemVariant::class, 'category', 'name');
     }
 }

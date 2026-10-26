@@ -502,7 +502,8 @@
             border-radius: 18px;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
             margin-bottom: 32px;
-            overflow: hidden;
+            overflow: visible;
+            position: relative;
         }
 
         /* Calendar Section Header & Toolbar */
@@ -510,11 +511,14 @@
             padding: 22px 28px;
             border-bottom: 1px solid var(--border-subtle);
             background: #ffffff;
+            border-radius: 18px 18px 0 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 18px;
+            position: relative;
+            z-index: 30;
         }
 
         .calendar-title-group {
@@ -576,22 +580,35 @@
             flex-wrap: wrap;
         }
 
-        .calendar-select-filter {
-            background: #ffffff;
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            padding: 8px 14px;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: var(--text-main);
-            outline: none;
-            cursor: pointer;
-            transition: border-color 0.15s;
-            max-width: 240px;
+        .calendar-office-dropdown-container {
+            width: 600px;
         }
 
-        .calendar-select-filter:focus {
-            border-color: #09090b;
+        .calendar-office-dropdown-container .pgso-dropdown-search-wrapper {
+            position: relative;
+        }
+
+        .calendar-office-dropdown-container .pgso-ds-trigger {
+            height: 38px;
+            min-height: 38px;
+            padding: 0 12px;
+            border-radius: 10px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            border: 1px solid var(--border-subtle);
+            background-color: #ffffff;
+            color: var(--text-main);
+        }
+
+        .calendar-office-dropdown-container .pgso-ds-selected-label,
+        .calendar-office-dropdown-container .pgso-ds-placeholder {
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .calendar-office-dropdown-container .pgso-ds-menu {
+            min-width: 280px;
+            z-index: 1050;
         }
 
         .calendar-search-wrapper {
@@ -609,19 +626,21 @@
         }
 
         .calendar-search-input {
+            height: 38px;
             padding: 8px 14px 8px 34px;
             border: 1px solid var(--border-subtle);
             border-radius: 10px;
             font-size: 0.8125rem;
             color: var(--text-main);
-            width: 220px;
+            width: 240px;
             outline: none;
             transition: all 0.15s ease;
+            box-sizing: border-box;
         }
 
         .calendar-search-input:focus {
             border-color: #09090b;
-            width: 260px;
+            width: 270px;
         }
 
         /* Calendar Workspace Grid & Inspector Layout */
@@ -630,6 +649,8 @@
             grid-template-columns: minmax(0, 1fr) 390px;
             background: #ffffff;
             min-height: 640px;
+            border-radius: 0 0 18px 18px;
+            overflow: hidden;
         }
 
         /* Left Big Calendar Grid */
@@ -1137,10 +1158,26 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+            .calendar-office-dropdown-container,
+            .calendar-office-dropdown-container .pgso-dropdown-search-wrapper,
+            .calendar-search-wrapper,
+            .calendar-search-input {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
         }
     </style>
 </head>
 <body>
+    @php
+        $calendarOfficeOptions = collect([
+            ['id' => '', 'name' => 'All Custody Offices', 'code' => 'ALL'],
+        ])->concat($offices->map(fn($o) => [
+            'id' => (string) $o->id,
+            'name' => $o->office_name,
+            'code' => $o->office_code,
+        ]))->toArray();
+    @endphp
 
     <x-sidebar>
         <div class="dashboard-content-area">
@@ -1393,12 +1430,19 @@
 
                     <!-- Filters & Search inside Calendar -->
                     <div class="calendar-filters-group">
-                        <select id="calendarOfficeFilter" class="calendar-select-filter">
-                            <option value="ALL">🏢 All Custody Offices</option>
-                            @foreach($offices as $office)
-                                <option value="{{ $office->id }}">{{ $office->office_name }} ({{ $office->office_code }})</option>
-                            @endforeach
-                        </select>
+                        <div class="calendar-office-dropdown-container">
+                            <x-dropdown-search 
+                                name="calendar_office_filter" 
+                                id="calendarOfficeFilter" 
+                                :options="$calendarOfficeOptions"
+                                valueKey="id" 
+                                labelKey="name" 
+                                subtextKey="code" 
+                                placeholder="All Custody Offices"
+                                searchPlaceholder="Search office name or code..." 
+                                :allowClear="true" 
+                            />
+                        </div>
 
                         <div class="calendar-search-wrapper">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1542,7 +1586,7 @@
         // Calendar State
         let currentCalendarDate = new Date();
         let selectedDateStr = formatDateKey(new Date());
-        let activeOfficeFilter = 'ALL';
+        let activeOfficeFilter = '';
         let searchQuery = '';
 
         // Month Names
@@ -1593,11 +1637,15 @@
         function setupCalendarFilters() {
             const officeSelect = document.getElementById('calendarOfficeFilter');
             if (officeSelect) {
-                officeSelect.addEventListener('change', (e) => {
-                    activeOfficeFilter = e.target.value;
+                const handleOfficeFilterChange = () => {
+                    activeOfficeFilter = officeSelect.value;
                     renderCalendar();
                     renderInspector(selectedDateStr);
-                });
+                };
+
+                officeSelect.addEventListener('change', handleOfficeFilterChange);
+                officeSelect.addEventListener('dropdown-selected', handleOfficeFilterChange);
+                officeSelect.addEventListener('dropdown-cleared', handleOfficeFilterChange);
             }
 
             const searchInput = document.getElementById('calendarSearchInput');
@@ -1620,7 +1668,7 @@
         function getFilteredEvents() {
             return allReleaseEvents.filter(ev => {
                 // Office filter
-                if (activeOfficeFilter !== 'ALL' && String(ev.officeId) !== String(activeOfficeFilter)) {
+                if (activeOfficeFilter && activeOfficeFilter !== 'ALL' && activeOfficeFilter !== '' && String(ev.officeId) !== String(activeOfficeFilter)) {
                     return false;
                 }
 

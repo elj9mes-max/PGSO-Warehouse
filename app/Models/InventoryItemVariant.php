@@ -94,11 +94,59 @@ class InventoryItemVariant extends Model
     }
 
     /**
-     * Get the inventory item that owns this variant.
+     * Accessor for item name mapping to variant_name.
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->variant_name ?? '';
+    }
+
+    /**
+     * Accessor for item_code with fallback to sku/barcode.
+     */
+    public function getItemCodeAttribute(): string
+    {
+        return $this->attributes['item_code'] ?? ($this->attributes['sku'] ?? ($this->attributes['barcode'] ?? 'VAR-'.$this->id));
+    }
+
+    /**
+     * Get the category record associated with this variant directly.
+     */
+    public function categoryModel(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category', 'name');
+    }
+
+    /**
+     * Get the effective category name for this variant.
+     */
+    public function getEffectiveCategoryAttribute(): string
+    {
+        return $this->categoryModel?->name ?: ($this->category ?: ($this->inventoryItem?->category ?: 'General'));
+    }
+
+    /**
+     * Accessor for description mapping to variant_description.
+     */
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->variant_description;
+    }
+
+    /**
+     * Get the parent inventory item if associated.
      */
     public function inventoryItem(): BelongsTo
     {
         return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
+    }
+
+    /**
+     * Accessor for variants returning self or child variants.
+     */
+    public function getVariantsAttribute()
+    {
+        return collect([$this]);
     }
 
     /**
@@ -131,6 +179,16 @@ class InventoryItemVariant extends Model
     }
 
     /**
+     * Get the stock cards for this variant.
+     *
+     * @return HasMany<StockCard, $this>
+     */
+    public function stockCards(): HasMany
+    {
+        return $this->hasMany(StockCard::class, 'inventory_item_variant_id');
+    }
+
+    /**
      * Get active batches with remaining quantity.
      */
     public function activeBatches(): HasMany
@@ -143,7 +201,7 @@ class InventoryItemVariant extends Model
      */
     public function getEffectiveUnitAttribute(): string
     {
-        return $this->unit ?: ($this->inventoryItem?->unit ?? 'pcs');
+        return $this->unit ?: 'pcs';
     }
 
     /**

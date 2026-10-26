@@ -369,7 +369,7 @@ test('inventory page includes variant details in search dataset for live variant
     $response = $this->actingAs($admin)->get(route('admin.inventory'));
 
     $response->assertOk();
-    $response->assertSee('data-variants="heavy duty 50 meters bar-cord-50m sku-cord-hd50', false);
+    $response->assertSee('data-variants="heavy duty 50 meters bar-cord-50m', false);
     $response->assertSee('Heavy Duty 50 Meters');
 });
 

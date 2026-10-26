@@ -1029,7 +1029,7 @@
                 'id' => (string) $variant->id,
                 'itemName' => $item?->name ?? $variant->variant_name,
                 'itemCode' => $item?->item_code ?? $variant->item_code ?? $code,
-                'category' => $variant->category ?: ($item?->category ?? 'General'),
+                // 'category' => $variant->category ?: ($item?->category ?? 'General'),
                 'variantName' => $variant->variant_name,
                 'variantDescription' => $variant->variant_description ?: ($item?->description ?? ''),
                 'sku' => $variant->sku,
@@ -1066,10 +1066,10 @@
                 </div>
 
                 <div class="header-actions">
-                    <a href="{{ session('received_po') ? route('admin.inventory.iar-form', ['po' => session('received_po')]) : route('admin.inventory.iar-form') }}" class="btn-outline" target="_blank" style="color: #059669; border-color: #a7f3d0; background: #f0fdf4;">
+                    {{-- <a href="{{ session('received_po') ? route('admin.inventory.iar-form', ['po' => session('received_po')]) : route('admin.inventory.iar-form') }}" class="btn-outline" target="_blank" style="color: #059669; border-color: #a7f3d0; background: #f0fdf4;">
                         <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                         <span>Print IAR Form (A4)</span>
-                    </a>
+                    </a> --}}
                     <a href="{{ route('admin.inventory') }}" class="btn-outline">
                         <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                         <span>Back to Inventory</span>
@@ -1130,6 +1130,7 @@
             <form action="{{ route('admin.inventory.purchase-request.store') }}" method="POST" id="poReceiveForm">
                 @csrf
 
+
                 <!-- Section 1: PO & Destination Details -->
                 <div class="form-card">
                     <div class="card-header-bar">
@@ -1139,7 +1140,7 @@
                             </div>
                             <div>
                                 <h2 class="card-title">1. Delivery Custody & Destination</h2>
-                                <p class="card-subtitle">Choose where the incoming supplies will be stored or assigned</p>
+                               
                             </div>
                         </div>
                     </div>
@@ -1147,7 +1148,7 @@
                     <div class="form-grid-3">
                         <!-- Destination Office Selector using Dropdown Search Component -->
                         <div class="form-field" style="grid-column: span 2;">
-                            <label for="officeDestinationSelect">Stock Destination Custody <span style="color: #ef4444;">*</span></label>
+                            <label for="officeDestinationSelect">Select Office <span style="color: #ef4444;">*</span></label>
                             
                             <x-dropdown-search 
                                 name="office_id"
@@ -1185,26 +1186,35 @@
                     <input type="hidden" name="generate_iar" id="hiddenGenerateIar" value="1">
                     <input type="hidden" name="auto_print" id="hiddenAutoPrint" value="0">
 
-                    <div class="form-grid-3">
+                    <div class="form-grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px;">
                         <!-- PO Number -->
                         <div class="form-field">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <label for="po_number">Purchase Order (PO) No.</label>
-                                <button type="button" onclick="generatePoNumber()" style="background: none; border: none; color: #2563eb; font-size: 0.6875rem; font-weight: 600; cursor: pointer;">⚡ Auto-Generate</button>
+                                {{-- <button type="button" onclick="generatePoNumber()" style="background: none; border: none; color: #2563eb; font-size: 0.6875rem; font-weight: 600; cursor: pointer;">⚡ Auto-Generate</button> --}}
                             </div>
-                            <input type="text" name="po_number" id="po_number" class="form-input" placeholder="e.g. PO-2026-0482" value="{{ old('po_number') }}">
+                            <input type="text" name="po_number" id="po_number" class="form-input" placeholder="e.g. PO-2026-0418" value="{{ old('po_number') }}">
+                        </div>
+
+                        <!-- AIR / IAR Number -->
+                        <div class="form-field">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label for="air_number">AIR / IAR Number</label>
+                                <button type="button" onclick="generateAirNumber()" style="background: none; border: none; color: #059669; font-size: 0.6875rem; font-weight: 600; cursor: pointer;">⚡ Auto-Generate</button>
+                            </div>
+                            <input type="text" name="air_number" id="air_number" class="form-input" placeholder="e.g. AIR-2026-0418" value="{{ old('air_number') }}">
                         </div>
 
                         <!-- Supplier / Vendor -->
                         <div class="form-field">
                             <label for="supplier">Supplier / Merchant</label>
-                            <input type="text" name="supplier" id="supplier" class="form-input" placeholder="e.g. Advance Paper Corp / Crown Trading" value="{{ old('supplier') }}">
+                            <input type="text" name="supplier" id="supplier" class="form-input" placeholder="e.g. Advance Paper Corp" value="{{ old('supplier') }}">
                         </div>
 
                         <!-- Sales Invoice / DR Number -->
                         <div class="form-field">
                             <label for="invoice_number">Invoice / DR No. (Optional)</label>
-                            <input type="text" name="invoice_number" id="invoice_number" class="form-input" placeholder="e.g. SI-77291 / DR-0482" value="{{ old('invoice_number') }}">
+                            <input type="text" name="invoice_number" id="invoice_number" class="form-input" placeholder="e.g. INV-88392" value="{{ old('invoice_number') }}">
                         </div>
                     </div>
 
@@ -1212,7 +1222,7 @@
                         <!-- PR Number (Optional) -->
                         <div class="form-field">
                             <label for="pr_number">Purchase Request (PR) No. (Optional)</label>
-                            <input type="text" name="pr_number" id="pr_number" class="form-input" placeholder="e.g. PR-2026-0112" value="{{ old('pr_number') }}">
+                            <input type="text" name="pr_number" id="pr_number" class="form-input" value="{{ old('pr_number') }}">
                         </div>
 
                         <!-- Delivery Remarks -->
@@ -1446,6 +1456,7 @@
                         <thead>
                             <tr>
                                 <th>Batch No.</th>
+                                <th>AIR No.</th>
                                 <th>PO Number</th>
                                 <th>Supply Item & Variant</th>
                                 <th>Unit Price</th>
@@ -1462,8 +1473,20 @@
                                         <span class="batch-pill">{{ $batch->batch_number }}</span>
                                     </td>
                                     <td>
+                                        @if($batch->air_number)
+                                            <a href="{{ route('admin.inventory.iar-form', ['air' => $batch->air_number, 'po' => $batch->po_number]) }}" target="_blank" class="po-pill po-pill-link" style="border-color: rgba(37, 99, 235, 0.3); background: rgba(37, 99, 235, 0.08); color: #2563eb;" title="View Official IAR Form for {{ $batch->air_number }}">
+                                                <span>{{ $batch->air_number }}</span>
+                                                <svg style="width: 10px; height: 10px; color: #2563eb;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('admin.inventory.iar-form', ['po' => $batch->po_number, 'batch' => $batch->id]) }}" target="_blank" class="po-pill po-pill-link" style="border-color: #cbd5e1; background: #f8fafc; color: #64748b;" title="Generate AIR Number for this batch">
+                                                <span>+ Generate</span>
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <td>
                                         @if($batch->po_number)
-                                            <a href="{{ route('admin.inventory.iar-form', ['po' => $batch->po_number]) }}" target="_blank" class="po-pill po-pill-link" title="Generate & View Official IAR Form for {{ $batch->po_number }}">
+                                            <a href="{{ route('admin.inventory.iar-form', ['po' => $batch->po_number, 'air' => $batch->air_number]) }}" target="_blank" class="po-pill po-pill-link" title="Generate & View Official IAR Form for {{ $batch->po_number }}">
                                                 <span>{{ $batch->po_number }}</span>
                                                 <svg style="width: 10px; height: 10px; color: #2563eb;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                                             </a>
@@ -1473,10 +1496,10 @@
                                     </td>
                                     <td>
                                         <div style="display: flex; flex-direction: column;">
-                                            <strong style="color: var(--text-primary);">{{ $batch->inventoryItem?->name ?? 'Standard Item' }}</strong>
+                                            <strong>{{ $batch->variant?->variant_name ?? 'Default' }}</strong> 
                                             <span style="font-size: 0.75rem; color: var(--text-secondary);">
-                                                Variant: <strong>{{ $batch->variant?->variant_name ?? 'Default' }}</strong> 
-                                                @if($batch->variant?->sku) • SKU: {{ $batch->variant->sku }} @endif
+                                                {{-- Variant: <strong>{{ $batch->variant?->variant_name ?? 'Default' }}</strong>  --}}
+                                                @if($batch->variant?->sku) • Item Code: {{ $batch->variant->sku }} @endif
                                             </span>
                                         </div>
                                     </td>
@@ -1509,7 +1532,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" style="text-align: center; padding: 36px 20px; color: var(--text-muted);">
+                                    <td colspan="9" style="text-align: center; padding: 36px 20px; color: var(--text-muted);">
                                         No deliveries or batches recorded yet. Submit your first Purchase Order delivery above!
                                     </td>
                                 </tr>
@@ -1539,6 +1562,7 @@
             });
         }
 
+
         let rowCounter = 0;
 
         function generatePoNumber() {
@@ -1546,6 +1570,20 @@
             const random = Math.floor(1000 + Math.random() * 9000);
             const poInput = document.getElementById('po_number');
             if (poInput) poInput.value = `PO-${year}-${random}`;
+
+            const airInput = document.getElementById('air_number');
+            if (airInput && !airInput.value.trim()) {
+                airInput.value = `AIR-${year}-${random}`;
+            }
+        }
+
+        function generateAirNumber() {
+            const year = new Date().getFullYear();
+            const poVal = document.getElementById('po_number')?.value.trim() || '';
+            const clean = poVal.replace(/[^0-9]/g, '');
+            const suffix = clean ? clean.slice(-4) : Math.floor(1000 + Math.random() * 9000);
+            const airInput = document.getElementById('air_number');
+            if (airInput) airInput.value = `AIR-${year}-${suffix}`;
         }
 
         // Live updates for Destination Office
@@ -1652,11 +1690,11 @@
                     <div style="display: flex; flex-direction: column;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <strong style="color: var(--text-primary); font-size: 0.9375rem;">${escapeHtml(variant.itemName)}</strong>
-                            <span style="font-size: 0.6875rem; background-color: #f4f4f5; border: 1px solid #e4e4e7; padding: 1px 6px; border-radius: 4px; color: #52525b;">${escapeHtml(variant.category || 'Supply')}</span>
+          
                         </div>
                         <span style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 3px;">
                             ${variant.variantName && variant.variantName !== variant.itemName ? `Variant: <strong style="color: #09090b;">${escapeHtml(variant.variantName)}</strong> • ` : ''}
-                            ${variant.sku ? `SKU: <span style="font-family: var(--font-mono);">${escapeHtml(variant.sku)}</span>` : ''}
+                            ${variant.sku ? `Item Code: <span style="font-family: var(--font-mono);">${escapeHtml(variant.sku)}</span>` : ''}
                             ${variant.barcode && variant.barcode !== variant.sku ? ` • Barcode: <span style="font-family: var(--font-mono);">${escapeHtml(variant.barcode)}</span>` : ''}
                         </span>
                         <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
@@ -1792,6 +1830,7 @@
         }
 
         function initPurchaseRequestPage() {
+
             // Setup listener for Destination Office dropdown
             const destInput = document.getElementById('officeDestinationSelect');
             if (destInput) {
@@ -1894,15 +1933,16 @@
 
                     rows.forEach(row => {
                         itemCount++;
-                        const nameEl = row.querySelector('.item-cell strong');
+                        const nameEl = row.querySelector('.item-cell strong') || row.querySelector('strong');
                         const variantEl = row.querySelector('.variant-badge');
+                        const unitSpan = row.querySelector('.row-qty-input ~ span');
                         const unitEl = row.querySelector('.unit-badge');
-                        const qtyInput = row.querySelector('.item-qty-input');
-                        const costInput = row.querySelector('.item-cost-input');
+                        const qtyInput = row.querySelector('.row-qty-input') || row.querySelector('.item-qty-input');
+                        const costInput = row.querySelector('.row-cost-input') || row.querySelector('.item-cost-input');
 
                         const itemName = nameEl ? nameEl.textContent.trim() : 'Item';
                         const variantName = variantEl ? variantEl.textContent.trim() : '';
-                        const unitName = unitEl ? unitEl.textContent.trim() : 'pcs';
+                        const unitName = unitEl ? unitEl.textContent.trim() : (unitSpan ? unitSpan.textContent.trim() : 'pcs');
                         const qty = qtyInput ? parseInt(qtyInput.value, 10) || 0 : 0;
                         const cost = costInput ? parseFloat(costInput.value) || 0 : 0;
                         const subtotal = qty * cost;

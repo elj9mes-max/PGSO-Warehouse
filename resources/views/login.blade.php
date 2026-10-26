@@ -462,7 +462,7 @@
                 <div>
                     <span class="badge-status">
                         <span class="status-dot"></span>
-                        PGSO • Property & Supply
+                        Property & Supply
                     </span>
                 </div>
 
@@ -573,10 +573,6 @@
                 </button>
 
                 {{-- Switch to Signup --}}
-                <p class="switch-auth">
-                    Don't have an account? 
-                    <a href="{{ Route::has('signup') ? route('signup') : url('/signup') }}">Create account</a>
-                </p>
             </form>
 
             {{-- Security Notice --}}

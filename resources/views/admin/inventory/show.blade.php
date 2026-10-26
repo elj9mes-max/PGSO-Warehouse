@@ -909,7 +909,6 @@
                                 <th>Barcode & SKU</th>
                                 <th>Description / Specification</th>
                                 <th>Stock On Hand</th>
-                                <th>Reorder Level</th>
                                 <th>Unit Cost</th>
                                 <th>Location</th>
                                 <th>Inspection Status</th>
@@ -959,7 +958,8 @@
                                     </td>
                                     <td>
                                         <button type="button" class="qty-badge-btn"
-                                            onclick="openEditVariantModal({{ json_encode($variant) }})"
+                                            data-variant="{{ json_encode($variant) }}"
+                                            onclick="openEditVariantModal(JSON.parse(this.dataset.variant))"
                                             title="Click to edit quantity & details">
                                             <span class="qty-strong">{{ $variant->quantity }}</span>
                                             <span class="qty-unit">{{ $variant->effective_unit }}</span>
@@ -970,7 +970,6 @@
                                             </svg>
                                         </button>
                                     </td>
-                                    <td>{{ $variant->reorder_level }} {{ $variant->effective_unit }}</td>
                                     <td><strong>₱{{ number_format($variant->unit_cost ?: $inventoryItem->unit_cost, 2) }}</strong>
                                     </td>
                                     <td>
@@ -1026,7 +1025,8 @@
                                                 </form>
                                             @endif
                                             <button type="button" class="action-icon-btn"
-                                                onclick="openEditVariantModal({{ json_encode($variant) }})"
+                                                data-variant="{{ json_encode($variant) }}"
+                                                onclick="openEditVariantModal(JSON.parse(this.dataset.variant))"
                                                 title="Edit Variant Details & Quantity">
                                                 <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="2">
@@ -1038,7 +1038,9 @@
                                                 <span>Edit</span>
                                             </button>
                                             <button type="button" class="action-icon-btn danger"
-                                                onclick="confirmDeleteVariant({{ $variant->id }}, {{ json_encode($variant->variant_name) }})"
+                                                data-variant-id="{{ $variant->id }}"
+                                                data-variant-name="{{ $variant->variant_name }}"
+                                                onclick="confirmDeleteVariant(Number(this.dataset.variantId), this.dataset.variantName)"
                                                 title="Delete Variant">
                                                 <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="2">
@@ -1136,17 +1138,10 @@
                             placeholder="e.g. 0.5mm Bullet Tip Standard Gel Ink">
                     </div>
 
-                    <div class="form-row">
-                        <div class="modal-field">
-                            <label class="modal-label" for="newVariantQty">Initial Quantity *</label>
-                            <input type="number" id="newVariantQty" name="quantity" class="modal-input" min="0"
-                                value="50" required>
-                        </div>
-                        <div class="modal-field">
-                            <label class="modal-label" for="newVariantReorder">Reorder Threshold *</label>
-                            <input type="number" id="newVariantReorder" name="reorder_level" class="modal-input" min="0"
-                                value="{{ $inventoryItem->reorder_level }}" required>
-                        </div>
+                    <div class="modal-field">
+                        <label class="modal-label" for="newVariantQty">Initial Quantity *</label>
+                        <input type="number" id="newVariantQty" name="quantity" class="modal-input" min="0"
+                            value="50" required>
                     </div>
 
                     <div class="form-row">
@@ -1237,8 +1232,7 @@
                     </div>
 
                     <!-- Highlighted Editable Quantity Row -->
-                    <div class="form-row"
-                        style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin: 4px 0;">
+                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin: 4px 0;">
                         <div class="modal-field">
                             <label class="modal-label" for="editVariantQty"
                                 style="color: #0f172a; display: flex; align-items: center; gap: 6px;">
@@ -1249,12 +1243,6 @@
                             <input type="number" id="editVariantQty" name="quantity" class="modal-input" min="0"
                                 required style="font-weight: 700; font-size: 1rem;">
                             <span class="modal-hint">Live units available in stock</span>
-                        </div>
-                        <div class="modal-field">
-                            <label class="modal-label" for="editVariantReorder">Reorder Threshold *</label>
-                            <input type="number" id="editVariantReorder" name="reorder_level" class="modal-input"
-                                min="0" required>
-                            <span class="modal-hint">Triggers low stock alert</span>
                         </div>
                     </div>
 
@@ -1389,7 +1377,6 @@
                 document.getElementById('editVariantUnit').value = variant.unit || @json($inventoryItem->unit);
                 document.getElementById('editVariantDesc').value = variant.variant_description || '';
                 document.getElementById('editVariantQty').value = variant.quantity !== undefined ? variant.quantity : 0;
-                document.getElementById('editVariantReorder').value = variant.reorder_level !== undefined ? variant.reorder_level : 5;
                 document.getElementById('editVariantCost').value = variant.unit_cost || '';
                 document.getElementById('editVariantLocation').value = variant.location || '';
                 const editInspection = document.getElementById('editVariantInspection');

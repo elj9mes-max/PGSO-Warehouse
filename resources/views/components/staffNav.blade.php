@@ -1,3 +1,26 @@
+@props([
+    'unapprovedCount' => null,
+])
+
+@php
+    if ($unapprovedCount === null) {
+        if (auth()->check()) {
+            $user = auth()->user();
+            $query = \App\Models\RequisitionRequest::where('status', 'pending');
+            if ($user->office_id) {
+                $query->where('office_id', $user->office_id);
+            } else {
+                $query->where('user_id', $user->id);
+            }
+            $unapprovedCount = $query->count();
+        } else {
+            $unapprovedCount = 0;
+        }
+    } else {
+        $unapprovedCount = (int) $unapprovedCount;
+    }
+@endphp
+
 <!-- Bottom Navigation Spacer to prevent content overlap -->
 <div class="staff-bottom-spacer" style="height: 80px; width: 100%;" aria-hidden="true"></div>
 
@@ -89,7 +112,7 @@
             border-radius: 9999px;
         }
 
-        /* Badge for requisitions */
+        /* Badge for nav items */
         .staff-nav-badge {
             position: absolute;
             top: 4px;
@@ -99,8 +122,16 @@
             font-size: 0.625rem;
             font-weight: 700;
             padding: 1px 5px;
+            min-width: 16px;
+            text-align: center;
             border-radius: 9999px;
             line-height: 1.2;
+        }
+
+        .staff-nav-badge-pending {
+            background-color: #d97706;
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(217, 119, 6, 0.35);
         }
 
         /* Sign Out Button styling */
@@ -144,7 +175,7 @@
             <span>Inventory</span>
         </a>
 
-        <!-- Requisitions with badge -->
+        <!-- Requisitions (Badge removed) -->
         <a href="{{ Route::has('staff.requisition.index') ? route('staff.requisition.index') : (Route::has('requisitions.index') ? route('requisitions.index') : url('/staff/requisition')) }}" 
            class="staff-nav-item {{ request()->is('staff/requisition*') || request()->is('requisitions*') ? 'active' : '' }}"
            title="Requisitions & Issuance">
@@ -154,7 +185,6 @@
                 <line x1="16" y1="13" x2="8" y2="13"/>
                 <line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
-            <span class="staff-nav-badge">6</span>
             <span>Requisitions</span>
         </a>
 
@@ -163,6 +193,9 @@
            class="staff-nav-item {{ request()->is('staff/request-stat*') || request()->is('request-stat*') ? 'active' : '' }}"
            title="Monitor Requisition Request Status & Logs">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-git-pull-request preview-icon"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/></svg>
+            @if($unapprovedCount > 0)
+                <span class="staff-nav-badge staff-nav-badge-pending" title="{{ $unapprovedCount }} unapproved request{{ $unapprovedCount > 1 ? 's' : '' }} pending review">{{ $unapprovedCount > 99 ? '99+' : $unapprovedCount }}</span>
+            @endif
             <span>Request Stat</span>
         </a>
 
@@ -180,3 +213,5 @@
         </form>
     </div>
 </nav>
+
+<x-alert-modal />

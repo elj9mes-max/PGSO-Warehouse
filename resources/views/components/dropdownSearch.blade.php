@@ -73,9 +73,9 @@
             <span class="pgso-ds-selected-label {{ ! $selectedItem ? 'pgso-ds-hidden' : '' }}" id="{{ $containerId }}_label">
                 {{ $selectedItem['label'] ?? '' }}
             </span>
-            <span class="pgso-ds-selected-badge {{ (! $selectedItem || empty($selectedItem['subtext'])) ? 'pgso-ds-hidden' : '' }}" id="{{ $containerId }}_badge">
+            {{-- <span class="pgso-ds-selected-badge {{ (! $selectedItem || empty($selectedItem['subtext'])) ? 'pgso-ds-hidden' : '' }}" id="{{ $containerId }}_badge">
                 {{ $selectedItem['subtext'] ?? '' }}
-            </span>
+            </span> --}}
         </div>
 
         <div class="pgso-ds-controls">
@@ -132,9 +132,9 @@
                     
                     <div class="pgso-ds-option-main">
                         <span class="pgso-ds-option-title">{{ $opt['label'] }}</span>
-                        @if(! empty($opt['subtext']))
+                        {{-- @if(! empty($opt['subtext']))
                             <span class="pgso-ds-option-subtext">{{ $opt['subtext'] }}</span>
-                        @endif
+                        @endif --}}
                     </div>
 
                     <span class="pgso-ds-check-icon {{ $isSelected ? '' : 'pgso-ds-hidden' }}">

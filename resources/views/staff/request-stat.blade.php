@@ -1055,51 +1055,7 @@
         </div>
 
         <!-- Metrics Grid -->
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-info">
-                    <div class="label">Total Requisitions</div>
-                    <div class="value">{{ $totalCount }}</div>
-                    <div class="subtext">RIS and PR requests logged</div>
-                </div>
-                <div class="metric-icon-box icon-purple">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/></svg>
-                </div>
-            </div>
 
-            <div class="metric-card">
-                <div class="metric-info">
-                    <div class="label">Pending Review</div>
-                    <div class="value">{{ $pendingCount }}</div>
-                    <div class="subtext">Awaiting PGSO authorization</div>
-                </div>
-                <div class="metric-icon-box icon-amber">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-info">
-                    <div class="label">Approved & Ready</div>
-                    <div class="value">{{ $approvedCount }}</div>
-                    <div class="subtext">Ready for warehouse release</div>
-                </div>
-                <div class="metric-icon-box icon-blue">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-info">
-                    <div class="label">Completed / Issued</div>
-                    <div class="value">{{ $issuedCount }}</div>
-                    <div class="subtext">{{ $totalUnitsRequested }} total units requested</div>
-                </div>
-                <div class="metric-icon-box icon-emerald">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                </div>
-            </div>
-        </div>
 
         <!-- View Switcher Tabs -->
         <div class="tabs-row">
@@ -1317,10 +1273,17 @@
                                     <span>View Items ({{ $itemsCount }})</span>
                                 </button>
 
-                                <a href="{{ route('staff.requisition.ris-form', ['requisition' => $req->id]) }}" class="btn-action-print" title="Open Printable RIS Slip">
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-                                    <span>Print Form</span>
-                                </a>
+                                @if(($req->request_type ?? '') === 'PR')
+                                    <a href="{{ route('staff.requisition.pr-form', ['requisition' => $req->id]) }}" class="btn-action-print" title="Open Printable Purchase Request Form">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                                        <span>Print PR Form</span>
+                                    </a>
+                                @else
+                                    <a href="{{ route('staff.requisition.ris-form', ['requisition' => $req->id]) }}" class="btn-action-print" title="Open Printable RIS Slip">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                                        <span>Print RIS Slip</span>
+                                    </a>
+                                @endif
                             </div>
                         </div>
 
@@ -1626,7 +1589,14 @@
 
             const modalPrintLink = document.getElementById('modalPrintLink');
             if (modalPrintLink) {
-                modalPrintLink.href = "{{ route('staff.requisition.ris-form') }}?requisition=" + request.id;
+                const labelSpan = modalPrintLink.querySelector('span');
+                if (request.request_type === 'PR') {
+                    modalPrintLink.href = "{{ route('staff.requisition.pr-form') }}?requisition=" + request.id;
+                    if (labelSpan) labelSpan.textContent = 'Print Official PR Form';
+                } else {
+                    modalPrintLink.href = "{{ route('staff.requisition.ris-form') }}?requisition=" + request.id;
+                    if (labelSpan) labelSpan.textContent = 'Print Official RIS Slip';
+                }
             }
 
             modalBackdrop.classList.add('open');
